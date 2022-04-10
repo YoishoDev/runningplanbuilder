@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
+  All rights reserved. Use is subject to license terms.
+
+  This file is available and licensed under the following license:
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the distribution.
+  - Neither the name of Oracle Corporation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hirola.runningplanbuilder.controller.MainSceneController">
+    <MenuBar fx:id="mainMenuBar" VBox.vgrow="NEVER">
+        <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
+            <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
+            <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open…" />
+            <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#onAction" text="Save" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="menuItemQuit" mnemonicParsing="false" onAction="#onAction" text="Quit" />
+        </Menu>
+        <Menu fx:id="menuEdit" mnemonicParsing="false" text="Edit">
+            <MenuItem fx:id="menuItemPreferences" mnemonicParsing="false" onAction="#onAction" text="Preferences…" />
+        </Menu>
+        <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">
+            <MenuItem fx:id="menuItemDebug" mnemonicParsing="false" onAction="#onAction" text="Debug" />
+            <MenuItem fx:id="menuItemAbout" mnemonicParsing="false" onAction="#onAction" text="RunningPlanBuilder" />
+        </Menu>
+    </MenuBar>
+    <SplitPane fx:id="mainSplitPane" dividerPositions="0.5" prefHeight="600.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
+        <AnchorPane fx:id="toolMenuAnchorPane" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
+            <Rectangle fx:id="runningUnitNodeMenuElement" arcHeight="5.0" arcWidth="5.0" fill="#f0ff1f" height="27.0" layoutX="61.0" layoutY="113.0" onMouseClicked="#onMouseClicked" stroke="BLACK" strokeType="INSIDE" width="80.0" />
+            <Circle fx:id="stopNodeMenuElement" fill="#ff5021" layoutX="100.0" layoutY="271.0" onMouseClicked="#onMouseClicked" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+            <Label fx:id="runningUnitNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="151.0" prefHeight="18.0" prefWidth="170.0" text="Running unit" textAlignment="CENTER" />
+            <Label fx:id="stopNodeMenuElementLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="294.0" prefHeight="18.0" prefWidth="170.0" text="End" textAlignment="CENTER" />
+            <Label fx:id="toolMenuInfoLabel" alignment="TOP_LEFT" layoutX="10.0" layoutY="366.0" prefHeight="170.0" prefWidth="170.0" text="Label" textOverrun="WORD_ELLIPSIS" wrapText="true" />
+        </AnchorPane>
+        <ScrollPane fitToWidth="true" >
+            <VBox>
+                <AnchorPane fx:id="editorAnchorPane" minHeight="600.0" minWidth="400.0" />
+            </VBox>
+        </ScrollPane>
+    </SplitPane>
+</VBox>
