@@ -13,8 +13,8 @@ import javafx.scene.shape.Shape;
  */
 public interface EditorNode {
     boolean isRelated();
-    EditorNode getSuccessorNode();
     void setSuccessorNode(EditorNode successorNode);
-    EditorNode getPredecessorNode();
+    EditorNode getSuccessorNode();
     void setPredecessorNode(EditorNode predecessorNode);
+    EditorNode getPredecessorNode();
 }

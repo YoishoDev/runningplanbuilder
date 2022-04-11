@@ -1,20 +1,18 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
-import de.hirola.runningplanbuilder.model.ConnectionNode;
-import de.hirola.runningplanbuilder.model.EditorNode;
-import de.hirola.runningplanbuilder.model.PointNode;
-import de.hirola.runningplanbuilder.model.RunningUnitNode;
+import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -36,6 +34,7 @@ public class MainSceneController {
     private Point2D lastNodePoint = null; // position of last added running unit node
     private int addedNodes = 0; // count oo added nodes
     private int nodeLineCount = 1; // increase while line break
+    private boolean isNewLine = false;
 
     // main app menu
     // created with SceneBuilder
@@ -148,17 +147,22 @@ public class MainSceneController {
         if (event.getSource().equals(stopNodeMenuElement) && stopNode == null) {
             // create a stop node
             stopNode = new PointNode(false);
-            // the elements cannot really be dragged and dropped
-            stopNode.setCenterX(60);
-            stopNode.setCenterY(30);
-            // register for editor handler
-            editorAnchorPaneController.registerNode(stopNode);
-            // add a stop node to editor pane
+            // set the position in pane
+            Point2D nodePos = getNodePosition();
+            stopNode.setCenterX(nodePos.getX());
+            stopNode.setCenterY(nodePos.getY() + Global.RUNNING_UNIT_NODE_HEIGHT / 2);
+            // create the connection between both nodes
+            createNodeConnection(lastAddedNode, stopNode);
+            // add both nodes to editor pane
             editorAnchorPane.getChildren().add(stopNode);
+            // remember the last added node
+            lastAddedNode = stopNode;
+            // register both nodes with the editor controller
+            editorAnchorPaneController.registerNode(stopNode);
         }
 
         // create a customized rectangle object in editor pane
-        if (event.getSource().equals(runningUnitNodeMenuElement)) {
+        if (event.getSource().equals(runningUnitNodeMenuElement) && stopNode == null) {
             // add the start node first
             if (startNode == null) {
                 // create the start node
@@ -175,32 +179,48 @@ public class MainSceneController {
                 runningUnitNode.setPredecessorNode(startNode);
                 // set the running unit node as neighbour
                 startNode.setNeighborNode(runningUnitNode);
-                // register both nodes with the editor controller
-                editorAnchorPaneController.registerNode(startNode);
-                editorAnchorPaneController.registerNode(runningUnitNode);
-                // create the connection between bth node
+                // create the connection between both nodes
                 createNodeConnection(startNode, runningUnitNode);
                 // add both nodes to editor pane
                 editorAnchorPane.getChildren().add(startNode);
                 editorAnchorPane.getChildren().add(runningUnitNode);
+                // remember the last added node
+                lastAddedNode = runningUnitNode;
+                // register both nodes with the editor controller
+                editorAnchorPaneController.registerNode(startNode);
+                editorAnchorPaneController.registerNode(runningUnitNode);
+                return;
             }
+            // add the next running unit node
+            Point2D nodePos = getNodePosition();
+            RunningUnitNode runningUnitNode = new RunningUnitNode(nodePos.getX(), nodePos.getY());
+            // set the previous node as predecessor
+            runningUnitNode.setPredecessorNode(lastAddedNode);
+            // create the connection between both nodes
+            createNodeConnection(lastAddedNode, runningUnitNode);
+            // add the node to editor pane
+            editorAnchorPane.getChildren().add(runningUnitNode);
+            // remember the last added node
+            lastAddedNode = runningUnitNode;
+            // register the node with the editor controller
+            editorAnchorPaneController.registerNode(runningUnitNode);
         }
-
     }
 
     private Point2D getNodePosition() {
         // get the "correct" position in the editor pane
+        Point2D nodePos;
         if (lastNodePoint == null) {
             // get the first position from Global depending on size of start node
             double posX = Global.EDITOR_PANE_NODE_START_POINT.getX();
             double posY = Global.EDITOR_PANE_NODE_START_POINT.getY()
                     + Global.RUNNING_UNIT_NODE_HEIGHT / 2;
-            lastNodePoint = new Point2D(posX,posY);
+            nodePos = new Point2D(posX,posY);
         } else {
             // calculate the position of next node
             if (addedNodes == 1) {
                 // between start node and first running unit node add only the space from Global
-                lastNodePoint = new Point2D(lastNodePoint.getX() + Global.SPACE_BETWEEN_NODES,
+                nodePos = new Point2D(lastNodePoint.getX() + Global.SPACE_BETWEEN_NODES,
                         Global.EDITOR_PANE_NODE_START_POINT.getY());
             } else {
                 double posX = lastNodePoint.getX() + Global.RUNNING_UNIT_NODE_WITH + Global.SPACE_BETWEEN_NODES;
@@ -217,19 +237,64 @@ public class MainSceneController {
                     posY = Global.EDITOR_PANE_NODE_START_POINT.getY()
                             + (nodeLineCount * Global.RUNNING_UNIT_NODE_HEIGHT)
                             + (nodeLineCount * Global.SPACE_BETWEEN_NODES);
+                    // increase the line count
                     nodeLineCount++;
+                    // set the flag for new line
+                    isNewLine = true;
                 }
-                lastNodePoint = new Point2D(posX, posY);
+                nodePos = new Point2D(posX,posY);
             }
         }
         addedNodes++;
-        return lastNodePoint;
+        lastNodePoint = nodePos;
+        return nodePos;
     }
 
     private void createNodeConnection(EditorNode firstNode, EditorNode secondNode) {
-
-        Line connectionLine = new Line();
-        ConnectionNode connectionNode = new ConnectionNode(firstNode, startNode, connectionLine);
-        editorAnchorPaneController.registerNode(connectionNode);
+        // get the center of both nodes
+        Bounds firstNodeBounds = ((Shape) firstNode).getBoundsInLocal();
+        Bounds secondNodeBounds = ((Shape) secondNode).getBoundsInLocal();
+        Point2D startPoint;
+        if (firstNode instanceof PointNode) {
+            // setting the starting point to the right of the center of the circle
+            startPoint = new Point2D(firstNodeBounds.getCenterX() + (Global.CIRCLE_RADIUS / 2),
+                    firstNodeBounds.getCenterY());
+        } else {
+            // setting the start point of line at middle of the right edge of the first node
+            startPoint = new Point2D(firstNodeBounds.getCenterX() + (Global.RUNNING_UNIT_NODE_WITH / 2),
+                    firstNodeBounds.getCenterY());
+        }
+        if (isNewLine) {
+            // draw the connection to the new line
+            Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.RUNNING_UNIT_NODE_WITH / 2),
+                    secondNodeBounds.getCenterY());
+            LineBreakConnectionNode connectionNode = new LineBreakConnectionNode(firstNode, secondNode, startPoint, endPoint);
+            // add all nodes to editor pane
+            editorAnchorPane.getChildren().add(connectionNode);
+            // register all nodes with the editor controller
+            editorAnchorPaneController.registerNode(connectionNode);
+            // reset the flag
+            isNewLine = false;
+        } else {
+            if (secondNode instanceof PointNode) {
+                // setting the end point of line at middle of the left edge of the second node
+                Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.CIRCLE_RADIUS / 2),
+                        firstNodeBounds.getCenterY());
+                SimpleLineConnectionNode simpleLineConnectionNode = new SimpleLineConnectionNode(firstNode, secondNode, startPoint, endPoint);
+                // add the node to editor pane
+                editorAnchorPane.getChildren().add(simpleLineConnectionNode);
+                // register the node with the editor controller
+                editorAnchorPaneController.registerNode(simpleLineConnectionNode);
+            } else {
+                // setting the end point of line at middle of the left edge of the second node
+                Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.RUNNING_UNIT_NODE_WITH / 2),
+                        firstNodeBounds.getCenterY());
+                SimpleLineConnectionNode simpleLineConnectionNode = new SimpleLineConnectionNode(firstNode, secondNode, startPoint, endPoint);
+                // add the node to editor pane
+                editorAnchorPane.getChildren().add(simpleLineConnectionNode);
+                // register the node with the editor controller
+                editorAnchorPaneController.registerNode(simpleLineConnectionNode);
+            }
+        }
     }
 }

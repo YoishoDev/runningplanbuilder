@@ -33,4 +33,8 @@ public final class Global {
     public static double RUNNING_UNIT_NODE_WITH = 100;
     public static double RUNNING_UNIT_NODE_HEIGHT = 50;
     public static Color RUNNING_UNIT_NODE_STROKE_COLOR = Color.BLACK;
+
+    // connection notes
+    public static double CONNECTION_STROKE_WIDTH = 3.0;
+    public static double CONNECTION_LINE_BREAK_FACTOR = 1.3;
 }

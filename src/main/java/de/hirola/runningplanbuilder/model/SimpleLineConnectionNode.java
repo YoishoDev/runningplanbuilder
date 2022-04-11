@@ -1,7 +1,8 @@
 package de.hirola.runningplanbuilder.model;
 
+import de.hirola.runningplanbuilder.Global;
+import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Shape;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -13,14 +14,19 @@ import javafx.scene.shape.Shape;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class ConnectionNode extends Line implements EditorNode {
+public class SimpleLineConnectionNode extends Line implements EditorNode {
 
     private EditorNode startNode;
     private EditorNode endNode;
+    private final Point2D startPoint;
+    private final Point2D endPoint;
 
-    public ConnectionNode(EditorNode startNode, EditorNode endNode, Line connectionLine) {
+    public SimpleLineConnectionNode(EditorNode startNode, EditorNode endNode, Point2D startPoint, Point2D endPoint) {
         this.startNode = startNode;
         this.endNode = endNode;
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+        initialize();
     }
 
     @Override
@@ -45,6 +51,15 @@ public class ConnectionNode extends Line implements EditorNode {
     @Override
     public EditorNode getSuccessorNode() {
         return endNode;
+    }
+
+    private void initialize() {
+        setStartX(startPoint.getX());
+        setStartY(startPoint.getY());
+        setEndX(endPoint.getX());
+        setEndY(endPoint.getY());
+        setFill(Global.CONNECTION_COLOR);
+        setStrokeWidth(Global.CONNECTION_STROKE_WIDTH);
     }
 
 }

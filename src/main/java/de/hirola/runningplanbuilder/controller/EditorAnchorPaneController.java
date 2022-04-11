@@ -1,7 +1,6 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
-import de.hirola.runningplanbuilder.model.ConnectionNode;
 import de.hirola.runningplanbuilder.model.EditorNode;
 import de.hirola.runningplanbuilder.model.RunningUnitNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
@@ -38,7 +37,7 @@ public class EditorAnchorPaneController {
 
     private final ApplicationResources applicationResources  // bundle for localisation, ...
             = ApplicationResources.getInstance();
-    private AnchorPane editorAnchorPane = null; // editor pane for all elements
+    private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
     private MenuItem runningUnitElementContextMenuItemEdit;
     private MenuItem runningUnitElementContextMenuItemDelete;
@@ -82,8 +81,7 @@ public class EditorAnchorPaneController {
                                     Line connectionLine = new Line(start.getCenterX(), start.getCenterY(), end.getCenterX(), end.getCenterY());
                                     editorAnchorPane.getChildren().add(connectionLine);
                                     // create a new connection object
-                                    ConnectionNode connectionNode
-                                            = new ConnectionNode(connectionStartNode, connectionEndNode, connectionLine);
+
                                     // add
                                     Optional<EditorNode> r = registeredNodes.stream().filter(p -> p.equals(connectionStartNode)).findFirst();
                                     r.ifPresent(runningUnitNode -> runningUnitNode.setSuccessorNode(connectionEndNode));
@@ -211,14 +209,14 @@ public class EditorAnchorPaneController {
             if (node instanceof RunningUnitNode) {
                 if (!registeredNodes.contains(node)) {
                     // register for template
-                    registeredNodes.add((RunningUnitNode) node);
+                    registeredNodes.add(node);
                 }
             }
         }
     }
 
-    public void unregisterNode(Shape shape) {
-        registeredNodes.remove(shape);
+    public void unregisterNode(EditorNode node) {
+        registeredNodes.remove(node);
     }
 
     public void connectionShouldBeCreated() {
