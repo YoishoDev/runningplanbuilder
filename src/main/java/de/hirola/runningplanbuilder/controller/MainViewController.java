@@ -23,11 +23,11 @@ import javafx.scene.shape.Shape;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class MainSceneController {
+public class MainViewController {
 
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
-    private EditorAnchorPaneController editorAnchorPaneController; // handler for editor pane
+    private EditorViewController editorViewController; // handler for editor pane
     private PointNode startNode = null; // there can only be one in editor
     private PointNode stopNode = null; // there can only be one in editor
     private EditorNode lastAddedNode = null;
@@ -97,7 +97,7 @@ public class MainSceneController {
     @FXML
     private AnchorPane editorAnchorPane;
 
-    public MainSceneController() {}
+    public MainViewController() {}
 
     public void nodeWasDeleted(EditorNode node) {
         addedNodes--;
@@ -125,7 +125,7 @@ public class MainSceneController {
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
         // initialize the controller for editor pane
-        editorAnchorPaneController = new EditorAnchorPaneController(this, editorAnchorPane);
+        editorViewController = new EditorViewController(this, editorAnchorPane);
         // set nodes to javax default colors
         stopNodeMenuElement.setFill(Global.STOP_CIRCLE_COLOR);
         runningUnitNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
@@ -183,7 +183,7 @@ public class MainSceneController {
             // remember the last added node
             lastAddedNode = stopNode;
             // register both nodes with the editor controller
-            editorAnchorPaneController.registerNode(stopNode);
+            editorViewController.registerNode(stopNode);
         }
 
         // create a customized rectangle object in editor pane
@@ -212,8 +212,8 @@ public class MainSceneController {
                 // remember the last added node
                 lastAddedNode = runningUnitNode;
                 // register both nodes with the editor controller
-                editorAnchorPaneController.registerNode(startNode);
-                editorAnchorPaneController.registerNode(runningUnitNode);
+                editorViewController.registerNode(startNode);
+                editorViewController.registerNode(runningUnitNode);
                 return;
             }
             // add the next running unit node
@@ -228,7 +228,7 @@ public class MainSceneController {
             // remember the last added node
             lastAddedNode = runningUnitNode;
             // register the node with the editor controller
-            editorAnchorPaneController.registerNode(runningUnitNode);
+            editorViewController.registerNode(runningUnitNode);
         }
     }
 
@@ -297,7 +297,7 @@ public class MainSceneController {
             // add all nodes to editor pane
             editorAnchorPane.getChildren().add(connectionNode);
             // register all nodes with the editor controller
-            editorAnchorPaneController.registerNode(connectionNode);
+            editorViewController.registerNode(connectionNode);
             // reset the flag
             isNewLine = false;
         } else {
@@ -309,7 +309,7 @@ public class MainSceneController {
                 // add the node to editor pane
                 editorAnchorPane.getChildren().add(simpleLineConnectionNode);
                 // register the node with the editor controller
-                editorAnchorPaneController.registerNode(simpleLineConnectionNode);
+                editorViewController.registerNode(simpleLineConnectionNode);
             } else {
                 // setting the end point of line at middle of the left edge of the second node
                 Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.RUNNING_UNIT_NODE_WITH / 2),
@@ -318,7 +318,7 @@ public class MainSceneController {
                 // add the node to editor pane
                 editorAnchorPane.getChildren().add(simpleLineConnectionNode);
                 // register the node with the editor controller
-                editorAnchorPaneController.registerNode(simpleLineConnectionNode);
+                editorViewController.registerNode(simpleLineConnectionNode);
             }
         }
         // save connection info in nodes

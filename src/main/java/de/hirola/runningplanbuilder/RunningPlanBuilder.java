@@ -21,7 +21,7 @@ public class RunningPlanBuilder extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         ApplicationResources applicationResources = ApplicationResources.getInstance();
-        FXMLLoader fxmlLoader = new FXMLLoader(RunningPlanBuilder.class.getResource("main-scene.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(RunningPlanBuilder.class.getResource("main-view.fxml"));
         //TODO: use last size
         // Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         Scene scene = new Scene(fxmlLoader.load(), 1000, 800);

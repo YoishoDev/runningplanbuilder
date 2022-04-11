@@ -5,6 +5,7 @@ import de.hirola.runningplanbuilder.model.EditorNode;
 import de.hirola.runningplanbuilder.model.PointNode;
 import de.hirola.runningplanbuilder.model.RunningUnitNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.runningplanbuilder.view.UnitNodeView;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -21,8 +22,8 @@ import javafx.scene.shape.Shape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,12 @@ import java.util.Optional;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class EditorAnchorPaneController {
+public class EditorViewController {
 
     private final ApplicationResources applicationResources  // bundle for localisation, ...
             = ApplicationResources.getInstance();
-    private final MainSceneController mainSceneController;
+    private final MainViewController mainViewController;
+    private UnitNodeView unitNodeView;
     private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
     private ContextMenu nodeContextMenu;
@@ -57,7 +59,15 @@ public class EditorAnchorPaneController {
 
                 // open the edit view on double click
                 if (event.getClickCount() == 2) {
-                    System.out.println("Doppelklick");
+                    if (unitNodeView == null) {
+                        unitNodeView = new UnitNodeView();
+                    }
+                    try {
+                        unitNodeView.showView();
+                    } catch (IOException exception) {
+                        //TODO: Alert
+                        exception.printStackTrace();
+                    }
                     return;
                 }
                 if (connectionShouldBeCreated) {
@@ -195,9 +205,9 @@ public class EditorAnchorPaneController {
 
             };
 
-    public EditorAnchorPaneController(@NotNull MainSceneController mainSceneController,
-                                      @NotNull AnchorPane editorAnchorPane) {
-        this.mainSceneController = mainSceneController;
+    public EditorViewController(@NotNull MainViewController mainViewController,
+                                @NotNull AnchorPane editorAnchorPane) {
+        this.mainViewController = mainViewController;
         this.editorAnchorPane = editorAnchorPane;
         connectionShouldBeCreated = false;
         createContextMenuForNodes();
@@ -281,6 +291,6 @@ public class EditorAnchorPaneController {
             editorNode.getPredecessorNode().setSuccessorNode(null);
             // inform the main controller
         }
-        mainSceneController.nodeWasDeleted(editorNode);
+        mainViewController.nodeWasDeleted(editorNode);
     }
 }

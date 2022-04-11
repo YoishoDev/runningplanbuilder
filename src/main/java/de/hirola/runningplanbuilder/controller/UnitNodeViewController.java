@@ -9,5 +9,5 @@ package de.hirola.runningplanbuilder.controller;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class RunningUnitNodeEditViewController {
+public class UnitNodeViewController {
 }
