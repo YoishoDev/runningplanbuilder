@@ -23,9 +23,13 @@ public class PointNode extends Circle implements EditorNode {
         initialize();
     }
 
+    public boolean isStartNode() {
+        return isStartNode;
+    }
+
     @Override
     public boolean isRelated() {
-        return false;
+        return neighborNode != null;
     }
 
     public void setNeighborNode(EditorNode neighborNode) {

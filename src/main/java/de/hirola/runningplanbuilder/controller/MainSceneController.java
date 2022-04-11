@@ -33,6 +33,7 @@ public class MainSceneController {
     private EditorNode lastAddedNode = null;
     private Point2D lastNodePoint = null; // position of last added running unit node
     private int addedNodes = 0; // count oo added nodes
+    private boolean nodesCanBeAdded = true;
     private int nodeLineCount = 1; // increase while line break
     private boolean isNewLine = false;
 
@@ -98,11 +99,33 @@ public class MainSceneController {
 
     public MainSceneController() {}
 
+    public void nodeWasDeleted(EditorNode node) {
+        addedNodes--;
+        // new nodes can be added if the stop node has been deleted
+        if (node instanceof PointNode) {
+            if (!((PointNode) node).isStartNode()) {
+                stopNode = null;
+                nodesCanBeAdded = true;
+            } else {
+                // start point was deleted
+                // reset all values
+                addedNodes = 0;
+                nodeLineCount = 0;
+                startNode = null;
+                lastNodePoint = null;
+            }
+        } else {
+            // set the new node position
+            lastAddedNode = node.getPredecessorNode();
+        }
+    }
+
+
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
         // initialize the controller for editor pane
-        editorAnchorPaneController = new EditorAnchorPaneController(editorAnchorPane);
+        editorAnchorPaneController = new EditorAnchorPaneController(this, editorAnchorPane);
         // set nodes to javax default colors
         stopNodeMenuElement.setFill(Global.STOP_CIRCLE_COLOR);
         runningUnitNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
@@ -155,6 +178,8 @@ public class MainSceneController {
             createNodeConnection(lastAddedNode, stopNode);
             // add both nodes to editor pane
             editorAnchorPane.getChildren().add(stopNode);
+            // nodes cannot be added now
+            nodesCanBeAdded = false;
             // remember the last added node
             lastAddedNode = stopNode;
             // register both nodes with the editor controller
@@ -162,7 +187,7 @@ public class MainSceneController {
         }
 
         // create a customized rectangle object in editor pane
-        if (event.getSource().equals(runningUnitNodeMenuElement) && stopNode == null) {
+        if (event.getSource().equals(runningUnitNodeMenuElement) && nodesCanBeAdded) {
             // add the start node first
             if (startNode == null) {
                 // create the start node
@@ -296,5 +321,8 @@ public class MainSceneController {
                 editorAnchorPaneController.registerNode(simpleLineConnectionNode);
             }
         }
+        // save connection info in nodes
+        secondNode.setPredecessorNode(firstNode);
+        firstNode.setSuccessorNode(secondNode);
     }
 }

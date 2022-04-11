@@ -2,6 +2,7 @@ package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.EditorNode;
+import de.hirola.runningplanbuilder.model.PointNode;
 import de.hirola.runningplanbuilder.model.RunningUnitNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import javafx.event.ActionEvent;
@@ -17,10 +18,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
-import java.awt.geom.Area;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,10 +39,12 @@ public class EditorAnchorPaneController {
 
     private final ApplicationResources applicationResources  // bundle for localisation, ...
             = ApplicationResources.getInstance();
+    private final MainSceneController mainSceneController;
     private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
-    private MenuItem runningUnitElementContextMenuItemEdit;
-    private MenuItem runningUnitElementContextMenuItemDelete;
+    private ContextMenu nodeContextMenu;
+    private MenuItem nodeContextMenuItemEdit;
+    private MenuItem nodeContextMenuItemDelete;
     private double onMousePressedPosX, onMousePressedPosY; // position of an element when drag begins
     private double translatedPosX, translatedPosY; // ???
     private EditorNode connectionStartNode;
@@ -63,9 +67,7 @@ public class EditorAnchorPaneController {
                         if (!((EditorNode) event.getSource()).isRelated()) {
                             connectionStartNode = (EditorNode) event.getSource();
                             ((Shape) connectionStartNode).setCursor(Cursor.CROSSHAIR);
-                            if (editorAnchorPane != null) {
-                                editorAnchorPane.setCursor(Cursor.CROSSHAIR);
-                            }
+                            editorAnchorPane.setCursor(Cursor.CROSSHAIR);
                             return;
                         }
                     }
@@ -75,23 +77,21 @@ public class EditorAnchorPaneController {
                             if (!((EditorNode) event.getSource()).isRelated()) {
                                 EditorNode connectionEndNode = (EditorNode) event.getSource();
                                 // create a line object
-                                if (editorAnchorPane != null) {
-                                    Bounds start = ((Shape) connectionEndNode).getBoundsInParent();
-                                    Bounds end = ((Shape) connectionEndNode).getBoundsInParent();
-                                    Line connectionLine = new Line(start.getCenterX(), start.getCenterY(), end.getCenterX(), end.getCenterY());
-                                    editorAnchorPane.getChildren().add(connectionLine);
-                                    // create a new connection object
+                                Bounds start = ((Shape) connectionEndNode).getBoundsInParent();
+                                Bounds end = ((Shape) connectionEndNode).getBoundsInParent();
+                                Line connectionLine = new Line(start.getCenterX(), start.getCenterY(), end.getCenterX(), end.getCenterY());
+                                editorAnchorPane.getChildren().add(connectionLine);
+                                // create a new connection object
 
-                                    // add
-                                    Optional<EditorNode> r = registeredNodes.stream().filter(p -> p.equals(connectionStartNode)).findFirst();
-                                    r.ifPresent(runningUnitNode -> runningUnitNode.setSuccessorNode(connectionEndNode));
-                                    //
-                                    Optional<EditorNode> r2 = registeredNodes.stream().filter(p -> p.equals(connectionEndNode)).findFirst();
-                                    r2.ifPresent(runningUnitNode -> runningUnitNode.setPredecessorNode(connectionStartNode));
-                                    editorAnchorPane.setCursor(Cursor.DEFAULT);
-                                    connectionShouldBeCreated = false;
-                                    connectionStartNode = null;
-                                }
+                                // add
+                                Optional<EditorNode> r = registeredNodes.stream().filter(p -> p.equals(connectionStartNode)).findFirst();
+                                r.ifPresent(runningUnitNode -> runningUnitNode.setSuccessorNode(connectionEndNode));
+                                //
+                                Optional<EditorNode> r2 = registeredNodes.stream().filter(p -> p.equals(connectionEndNode)).findFirst();
+                                r2.ifPresent(runningUnitNode -> runningUnitNode.setPredecessorNode(connectionStartNode));
+                                editorAnchorPane.setCursor(Cursor.DEFAULT);
+                                connectionShouldBeCreated = false;
+                                connectionStartNode = null;
                             }
                         } else {
                             // user clicked on the same node
@@ -111,20 +111,14 @@ public class EditorAnchorPaneController {
                     ContextMenu contextMenu = ((MenuItem) event.getSource()).getParentPopup();
                     Node sourceOfContextMenu = contextMenu.getOwnerNode();
                     // context menu action from a running unit element
-                    if (event.getSource().equals(runningUnitElementContextMenuItemEdit)
+                    if (event.getSource().equals(nodeContextMenuItemEdit)
                             && sourceOfContextMenu instanceof RunningUnitNode) {
                         System.out.println("edit");
 
                     }
                     // context menu action from a running unit element
-                    if (event.getSource().equals(runningUnitElementContextMenuItemDelete)
-                            && sourceOfContextMenu instanceof RunningUnitNode) {
-                        // remove the element from editor pane and the list
-                        // TODO: ask the user inform main controller for position changed
-                        if (editorAnchorPane != null) {
-                            editorAnchorPane.getChildren().remove(sourceOfContextMenu);
-                            unregisterNode((RunningUnitNode) sourceOfContextMenu);
-                        }
+                    if (event.getSource().equals(nodeContextMenuItemDelete)) {
+                        deleteNode(sourceOfContextMenu);
                     }
                 }
             };
@@ -132,14 +126,25 @@ public class EditorAnchorPaneController {
     // right click for context menus
     EventHandler<ContextMenuEvent> onContextMenuRequestedEventHandler =
             event -> {
+                // reset menu items
+                nodeContextMenuItemDelete.setDisable(false);
+                nodeContextMenuItemEdit.setDisable(false);
+
                 if (event.getSource() instanceof RunningUnitNode) {
-                    RunningUnitNode runningUnitNode = (RunningUnitNode) event.getSource();
                     // connected nodes can not be delete
+                    RunningUnitNode runningUnitNode = (RunningUnitNode) event.getSource();
                     if (runningUnitNode.isRelated()) {
-                        runningUnitElementContextMenuItemDelete.setDisable(true);
+                        nodeContextMenuItemDelete.setDisable(true);
                     }
-                    getContextMenuForRunningUnitElement()
-                            .show(runningUnitNode, Side.RIGHT, 5, 5);
+                    nodeContextMenu.show(runningUnitNode, Side.RIGHT, 5, 5);
+                }
+                if (event.getSource() instanceof PointNode) {
+                    // stop node can only be deleted
+                    PointNode pointNode = (PointNode) event.getSource();
+                    if (!pointNode.isStartNode() || editorAnchorPane.getChildren().size() == 1) {
+                        nodeContextMenuItemEdit.setDisable(true);
+                        nodeContextMenu.show(pointNode, Side.RIGHT, 5, 5);
+                    }
                 }
             };
 
@@ -190,9 +195,12 @@ public class EditorAnchorPaneController {
 
             };
 
-    public EditorAnchorPaneController(@NotNull AnchorPane editorAnchorPane) {
+    public EditorAnchorPaneController(@NotNull MainSceneController mainSceneController,
+                                      @NotNull AnchorPane editorAnchorPane) {
+        this.mainSceneController = mainSceneController;
         this.editorAnchorPane = editorAnchorPane;
         connectionShouldBeCreated = false;
+        createContextMenuForNodes();
     }
 
     public void registerNode(EditorNode node) {
@@ -219,26 +227,60 @@ public class EditorAnchorPaneController {
         registeredNodes.remove(node);
     }
 
-    public void connectionShouldBeCreated() {
-        connectionShouldBeCreated = true;
-    }
-
-    private @NotNull ContextMenu getContextMenuForRunningUnitElement() {
+    private void createContextMenuForNodes() {
         // creating a context menu
-        ContextMenu contextMenu = new ContextMenu();
+        nodeContextMenu = new ContextMenu();
         // creating the menu Items for the context menu
-        runningUnitElementContextMenuItemEdit = new MenuItem(applicationResources.getString("action.edit"));
-        runningUnitElementContextMenuItemEdit.setOnAction(onActionEventHandler);
-        runningUnitElementContextMenuItemDelete = new MenuItem(applicationResources.getString("action.delete"));
-        runningUnitElementContextMenuItemDelete.setOnAction(onActionEventHandler);
-        contextMenu.getItems().addAll(runningUnitElementContextMenuItemEdit, runningUnitElementContextMenuItemDelete);
-        return contextMenu;
+        nodeContextMenuItemEdit = new MenuItem(applicationResources.getString("action.edit"));
+        nodeContextMenuItemEdit.setOnAction(onActionEventHandler);
+        nodeContextMenuItemDelete = new MenuItem(applicationResources.getString("action.delete"));
+        nodeContextMenuItemDelete.setOnAction(onActionEventHandler);
+        nodeContextMenu.getItems().addAll(nodeContextMenuItemEdit, nodeContextMenuItemDelete);
     }
 
-    private static boolean isOverlapping(Shape shapeA, Shape shapeB) {
-        Area areaA = new Area((java.awt.Shape) shapeA);
-        areaA.intersect(new Area((java.awt.Shape) shapeB));
-        return !areaA.isEmpty();
+    @Nullable
+    private EditorNode getConnectionNode(EditorNode predecessorNode, EditorNode successorNode) {
+        for (EditorNode editorNode : registeredNodes) {
+            if (editorNode.getPredecessorNode().equals(predecessorNode)
+                    && editorNode.getSuccessorNode().equals(successorNode)) {
+                return editorNode;
+            }
+        }
+        return null;
     }
 
+    private void deleteNode(Node node) {
+        // remove the element from editor pane and the list
+        // TODO: ask the user inform main controller for position changed
+        if (node instanceof PointNode) {
+            PointNode pointNode = (PointNode) node;
+            if (!pointNode.isStartNode() || editorAnchorPane.getChildren().size() == 1) {
+                // remove from editor pane
+                editorAnchorPane.getChildren().remove(node);
+                // unregister the node
+                unregisterNode((EditorNode) node);
+            }
+        }
+        if (node instanceof RunningUnitNode) {
+            // node cannot be deleted
+            if (((EditorNode) node).isRelated()) {
+                return;
+            }
+        }
+        // get the connection node for this relation
+        EditorNode editorNode = (EditorNode) node;
+        EditorNode connectionNode = getConnectionNode(editorNode.getPredecessorNode(), editorNode);
+        if (connectionNode != null) {
+            // remove from editor pane
+            editorAnchorPane.getChildren().remove((Node) connectionNode);
+            editorAnchorPane.getChildren().remove(node);
+            // unregister both nodes
+            unregisterNode(connectionNode);
+            unregisterNode(editorNode);
+            // remove the successor node from predecessor node
+            editorNode.getPredecessorNode().setSuccessorNode(null);
+            // inform the main controller
+        }
+        mainSceneController.nodeWasDeleted(editorNode);
+    }
 }

@@ -4,6 +4,8 @@ import de.hirola.runningplanbuilder.Global;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Polyline;
 
+import java.util.Objects;
+
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
  * This software us licensed under the AGPL-3.0 or later.
@@ -21,7 +23,8 @@ public class LineBreakConnectionNode extends Polyline implements EditorNode {
     private final Point2D startPoint;
     private final Point2D endPoint;
 
-    public LineBreakConnectionNode(EditorNode startNode, EditorNode endNode, Point2D startPoint, Point2D endPoint) {
+    public LineBreakConnectionNode(EditorNode startNode, EditorNode endNode,
+                                   Point2D startPoint, Point2D endPoint) {
         this.startNode = startNode;
         this.endNode = endNode;
         this.startPoint = startPoint;

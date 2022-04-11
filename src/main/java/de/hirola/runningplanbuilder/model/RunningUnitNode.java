@@ -26,6 +26,8 @@ public class RunningUnitNode extends Rectangle implements EditorNode {
 
     public RunningUnitNode(double posX, double posY) {
         uuid = UUID.randomUUID();
+        predecessorNode = null;
+        successorNode = null;
         initialize(posX, posY);
     }
 
