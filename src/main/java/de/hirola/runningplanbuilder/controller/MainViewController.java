@@ -3,6 +3,10 @@ package de.hirola.runningplanbuilder.controller;
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.runningplanbuilder.view.TemplateView;
+import de.hirola.sportslibrary.SportsLibrary;
+import de.hirola.sportslibrary.util.RunningPlanTemplate;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -10,9 +14,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Arc;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -25,15 +36,19 @@ import javafx.scene.shape.Shape;
  */
 public class MainViewController {
 
+    private SportsLibrary sportsLibrary;
+    private RunningPlanTemplate runningPlanTemplate; // actual template for the application
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
+    private HostServices hostServices;
+    private TemplateView templateView;
     private EditorViewController editorViewController; // handler for editor pane
     private PointNode startNode = null; // there can only be one in editor
     private PointNode stopNode = null; // there can only be one in editor
     private EditorNode lastAddedNode = null;
     private Point2D lastNodePoint = null; // position of last added running unit node
     private int addedNodes = 0; // count oo added nodes
-    private boolean nodesCanBeAdded = true;
+    private boolean nodesCanBeAdded = false;
     private int nodeLineCount = 1; // increase while line break
     private boolean isNewLine = false;
 
@@ -73,9 +88,11 @@ public class MainViewController {
     // the reference will be injected by the FXML loader
     private MenuItem menuItemAbout;
 
-    /*
-        Tool "menu"
-     */
+    // tool "menu"
+    @FXML
+    private Arc runningPlanTemplateNodeMenuElement;
+    @FXML
+    private Label runningPlanTemplateNodeLabel;
     @FXML
     private Rectangle runningUnitNodeMenuElement;
     @FXML
@@ -87,9 +104,7 @@ public class MainViewController {
     @FXML
     private Label toolMenuInfoLabel;
 
-    /*
-        Split pane elements
-     */
+    // split pane elements
     @FXML
     private SplitPane mainSplitPane;
     @FXML
@@ -98,6 +113,28 @@ public class MainViewController {
     private AnchorPane editorAnchorPane;
 
     public MainViewController() {}
+
+    public void setSportsLibrary(SportsLibrary sportsLibrary) {
+        this.sportsLibrary = sportsLibrary;
+    }
+
+    public void setHostServices(@NotNull HostServices hostServices) {
+        this.hostServices = hostServices;
+    }
+
+    @Nullable
+    public RunningPlanTemplate getRunningPlanTemplate() {
+        return runningPlanTemplate;
+    }
+
+    public void setRunningPlanTemplate(@Nullable RunningPlanTemplate runningPlanTemplate) {
+        this.runningPlanTemplate = runningPlanTemplate;
+        nodesCanBeAdded = runningPlanTemplate != null;
+        if (nodesCanBeAdded) {
+            // enable save menu item
+            menuItemSave.setDisable(false);
+        }
+    }
 
     public void nodeWasDeleted(EditorNode node) {
         addedNodes--;
@@ -120,15 +157,17 @@ public class MainViewController {
         }
     }
 
-
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
         // initialize the controller for editor pane
         editorViewController = new EditorViewController(this, editorAnchorPane);
         // set nodes to javax default colors
+        runningPlanTemplateNodeMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
         stopNodeMenuElement.setFill(Global.STOP_CIRCLE_COLOR);
         runningUnitNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
+        // disable save menu item
+        menuItemSave.setDisable(true);
         // localisation the menu (item) labels
         setMenuLabel();
         // localisation the tool "menu" item labels
@@ -149,6 +188,7 @@ public class MainViewController {
     }
 
     private void setToolMenuLabel() {
+        runningPlanTemplateNodeLabel.setText(applicationResources.getString("mainToolMenu.newTemplate"));
         runningUnitNodeLabel.setText(applicationResources.getString("mainToolMenu.runningUnit"));
         stopNodeMenuElementLabel.setText(applicationResources.getString("mainToolMenu.stop"));
         toolMenuInfoLabel.setText(applicationResources.getString("mainToolMenu.info"));
@@ -157,9 +197,27 @@ public class MainViewController {
     @FXML
     // use for onAction by the FXML loader
     private void onAction(ActionEvent event) {
+        if (event.getSource().equals(menuItemNew)) {
+            //TODO unsaved values - ask user
+            createNewTemplate();
+        }
+        if (event.getSource().equals(menuItemOpen)) {
+            //TODO unsaved values - ask user
+            importJSONFromFile();
+        }
+        if (event.getSource().equals(menuItemSave)) {
+            exportToJSONFile();
+        }
+        if (event.getSource().equals(menuItemQuit)) {
+            //TODO: unsaved values - ask user
+            Stage stage = (Stage) mainSplitPane.getScene().getWindow();
+            stage.close();
+        }
+        if (event.getSource().equals(menuItemDebug)) {
+            showDebugDialog();
+        }
         if (event.getSource().equals(menuItemAbout)) {
-            //TODO: show a info view
-            System.out.println("About...");
+            showAboutDialog();
         }
     }
 
@@ -167,23 +225,9 @@ public class MainViewController {
     // use for onMouseClicked by the FXML loader
     private void onMouseClicked(MouseEvent event) {
 
-        if (event.getSource().equals(stopNodeMenuElement) && stopNode == null) {
-            // create a stop node
-            stopNode = new PointNode(false);
-            // set the position in pane
-            Point2D nodePos = getNodePosition();
-            stopNode.setCenterX(nodePos.getX());
-            stopNode.setCenterY(nodePos.getY() + Global.RUNNING_UNIT_NODE_HEIGHT / 2);
-            // create the connection between both nodes
-            createNodeConnection(lastAddedNode, stopNode);
-            // add both nodes to editor pane
-            editorAnchorPane.getChildren().add(stopNode);
-            // nodes cannot be added now
-            nodesCanBeAdded = false;
-            // remember the last added node
-            lastAddedNode = stopNode;
-            // register both nodes with the editor controller
-            editorViewController.registerNode(stopNode);
+        if (event.getSource().equals(runningPlanTemplateNodeMenuElement)) {
+            // create a new running plan template
+            createNewTemplate();
         }
 
         // create a customized rectangle object in editor pane
@@ -229,6 +273,25 @@ public class MainViewController {
             lastAddedNode = runningUnitNode;
             // register the node with the editor controller
             editorViewController.registerNode(runningUnitNode);
+        }
+
+        if (event.getSource().equals(stopNodeMenuElement) && stopNode == null) {
+            // create a stop node
+            stopNode = new PointNode(false);
+            // set the position in pane
+            Point2D nodePos = getNodePosition();
+            stopNode.setCenterX(nodePos.getX());
+            stopNode.setCenterY(nodePos.getY() + Global.RUNNING_UNIT_NODE_HEIGHT / 2);
+            // create the connection between both nodes
+            createNodeConnection(lastAddedNode, stopNode);
+            // add both nodes to editor pane
+            editorAnchorPane.getChildren().add(stopNode);
+            // nodes cannot be added now
+            nodesCanBeAdded = false;
+            // remember the last added node
+            lastAddedNode = stopNode;
+            // register both nodes with the editor controller
+            editorViewController.registerNode(stopNode);
         }
     }
 
@@ -324,5 +387,56 @@ public class MainViewController {
         // save connection info in nodes
         secondNode.setPredecessorNode(firstNode);
         firstNode.setSuccessorNode(secondNode);
+    }
+
+    private void showDebugDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("debug.alert.header"));
+        VBox vBox = new VBox();
+        Label label = new Label(applicationResources.getString("debug.alert.info"));
+        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("debug.alert.info.url"));
+        hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
+        vBox.getChildren().addAll(label, hyperlink);
+        alert.getDialogPane().contentProperty().set(vBox);
+        alert.showAndWait();
+    }
+
+    private void showAboutDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("about.alert.header"));
+        VBox vBox = new VBox();
+        Label label = new Label(applicationResources.getString("about.alert.info"));
+        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("about.alert.info.url"));
+        hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
+        vBox.getChildren().addAll(label, hyperlink);
+        alert.getDialogPane().contentProperty().set(vBox);
+        alert.showAndWait();
+    }
+
+    private void createNewTemplate() {
+        // show dialog
+        if (templateView == null) {
+            templateView = new TemplateView(this, applicationResources);
+        }
+        try {
+            templateView.showView();
+        } catch (IOException exception) {
+            //TODO: Alert
+            exception.printStackTrace();
+        }
+    }
+
+    private void importJSONFromFile() {
+        // open system file dialog
+    }
+
+    private void exportToJSONFile() {
+        // export to json
     }
 }

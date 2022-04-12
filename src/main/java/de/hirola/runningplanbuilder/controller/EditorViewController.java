@@ -54,7 +54,7 @@ public class EditorViewController {
 
     // different event handlers
     // mouse click
-    EventHandler<MouseEvent> onMouseClickedEventHandler =
+    final EventHandler<MouseEvent> onMouseClickedEventHandler =
             event -> {
 
                 // open the edit view on double click
@@ -114,7 +114,7 @@ public class EditorViewController {
             };
 
     // action events
-    EventHandler<ActionEvent> onActionEventHandler =
+    final EventHandler<ActionEvent> onActionEventHandler =
             event -> {
                 if (event.getSource() instanceof MenuItem) {
                     // get the source of the context menu
@@ -123,7 +123,15 @@ public class EditorViewController {
                     // context menu action from a running unit element
                     if (event.getSource().equals(nodeContextMenuItemEdit)
                             && sourceOfContextMenu instanceof RunningUnitNode) {
-                        System.out.println("edit");
+                        if (unitNodeView == null) {
+                            unitNodeView = new UnitNodeView();
+                        }
+                        try {
+                            unitNodeView.showView();
+                        } catch (IOException exception) {
+                            //TODO: Alert
+                            exception.printStackTrace();
+                        }
 
                     }
                     // context menu action from a running unit element
@@ -134,7 +142,7 @@ public class EditorViewController {
             };
 
     // right click for context menus
-    EventHandler<ContextMenuEvent> onContextMenuRequestedEventHandler =
+    final EventHandler<ContextMenuEvent> onContextMenuRequestedEventHandler =
             event -> {
                 // reset menu items
                 nodeContextMenuItemDelete.setDisable(false);
@@ -160,7 +168,7 @@ public class EditorViewController {
 
     // drag and drop
     // drag starts
-    EventHandler<MouseEvent> onMousePressedEventHandler =
+    final EventHandler<MouseEvent> onMousePressedEventHandler =
             event ->  {
         if (Global.NODES_MOVABLE) {
             if (event.getSource() instanceof EditorNode) {
@@ -176,7 +184,7 @@ public class EditorViewController {
         };
 
     // moving the node
-    EventHandler<MouseEvent> onMouseDraggedEventHandler =
+    final EventHandler<MouseEvent> onMouseDraggedEventHandler =
             event -> {
                 if (Global.NODES_MOVABLE) {
                     if (event.getSource() instanceof EditorNode) {
@@ -196,7 +204,7 @@ public class EditorViewController {
             };
 
     // mouse released
-    EventHandler<MouseEvent> onMouseReleasedEventHandler =
+    final EventHandler<MouseEvent> onMouseReleasedEventHandler =
             event -> {
                 if (event.getSource() instanceof  EditorNode) {
                     // node moving finished

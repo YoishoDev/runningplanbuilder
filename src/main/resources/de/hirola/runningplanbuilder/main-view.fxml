@@ -41,10 +41,11 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hirola.runningplanbuilder.controller.MainViewController">
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.hirola.runningplanbuilder.controller.MainViewController">
     <MenuBar fx:id="mainMenuBar" VBox.vgrow="NEVER">
         <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
             <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
@@ -63,13 +64,15 @@
     </MenuBar>
     <SplitPane fx:id="mainSplitPane" dividerPositions="0.5" prefHeight="600.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
         <AnchorPane fx:id="toolMenuAnchorPane" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
-            <Rectangle fx:id="runningUnitNodeMenuElement" arcHeight="5.0" arcWidth="5.0" fill="#f0ff1f" height="27.0" layoutX="61.0" layoutY="113.0" onMouseClicked="#onMouseClicked" stroke="BLACK" strokeType="INSIDE" width="80.0" />
-            <Circle fx:id="stopNodeMenuElement" fill="#ff5021" layoutX="100.0" layoutY="271.0" onMouseClicked="#onMouseClicked" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+            <Rectangle fx:id="runningUnitNodeMenuElement" onMouseClicked="#onMouseClicked" arcHeight="5.0" arcWidth="5.0" fill="#f0ff1f" height="30.0" layoutX="61.0" layoutY="113.0" stroke="BLACK" strokeType="INSIDE" width="80.0" />
+            <Circle fx:id="stopNodeMenuElement" onMouseClicked="#onMouseClicked" fill="#ff5021" layoutX="100.0" layoutY="200.0" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
             <Label fx:id="runningUnitNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="151.0" prefHeight="18.0" prefWidth="170.0" text="Running unit" textAlignment="CENTER" />
-            <Label fx:id="stopNodeMenuElementLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="294.0" prefHeight="18.0" prefWidth="170.0" text="End" textAlignment="CENTER" />
-            <Label fx:id="toolMenuInfoLabel" alignment="TOP_LEFT" layoutX="10.0" layoutY="366.0" prefHeight="170.0" prefWidth="170.0" text="Label" textOverrun="WORD_ELLIPSIS" wrapText="true" />
+            <Label fx:id="stopNodeMenuElementLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="15.0" layoutY="229.0" prefHeight="18.0" prefWidth="170.0" text="End" textAlignment="CENTER" />
+            <Label fx:id="toolMenuInfoLabel" alignment="TOP_LEFT" layoutX="10.0" layoutY="301.0" prefHeight="279.0" prefWidth="170.0" text="Label" textOverrun="WORD_ELLIPSIS" wrapText="true" />
+         <Arc fx:id="runningPlanTemplateNodeMenuElement" onMouseClicked="#onMouseClicked" fill="DODGERBLUE" layoutX="109.0" layoutY="50.0" length="270.0" radiusX="47.0" radiusY="15.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+         <Label fx:id="runningPlanTemplateNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="75.0" prefHeight="18.0" prefWidth="170.0" text="New Template" textAlignment="CENTER" />
         </AnchorPane>
-        <ScrollPane fitToWidth="true" >
+        <ScrollPane fitToWidth="true">
             <VBox>
                 <AnchorPane fx:id="editorAnchorPane" minHeight="600.0" minWidth="400.0" />
             </VBox>

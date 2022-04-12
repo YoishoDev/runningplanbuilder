@@ -14,27 +14,31 @@ import javafx.scene.paint.Color;
  */
 public final class Global {
 
-    public static boolean NODES_MOVABLE = false;
+    public static final boolean NODES_MOVABLE = false;
+
+    // application parameter - can be overwritten by the user
+    public static final int MAX_COUNT_OF_WEEKS = 52;
+    public static final int MAX_ORDER_NUMBER = 30;
 
     // positions
-    public static Point2D EDITOR_PANE_NODE_START_POINT = new Point2D(40,20);
-    public static double SPACE_BETWEEN_NODES = 40d;
+    public static final Point2D EDITOR_PANE_NODE_START_POINT = new Point2D(40,20);
+    public static final double SPACE_BETWEEN_NODES = 40d;
 
     // colors
-    public static Color START_CIRCLE_COLOR = Color.GREEN;
-    public static Color STOP_CIRCLE_COLOR = Color.RED;
-    public static Color RUNNING_UNIT_NODE_COLOR = Color.YELLOW;
-    public static Color CONNECTION_COLOR = Color.BLACK;
+    public static final Color RUNNING_PLAN_TEMPLATE_NODE_COLOR = Color.ALICEBLUE;
+    public static final Color START_CIRCLE_COLOR = Color.GREEN;
+    public static final Color STOP_CIRCLE_COLOR = Color.RED;
+    public static final Color RUNNING_UNIT_NODE_COLOR = Color.YELLOW;
 
     // start and stop node
-    public static double CIRCLE_RADIUS = 10.0;
+    public static final double CIRCLE_RADIUS = 10.0;
 
     // running unit nodes
-    public static double RUNNING_UNIT_NODE_WITH = 100;
-    public static double RUNNING_UNIT_NODE_HEIGHT = 50;
-    public static Color RUNNING_UNIT_NODE_STROKE_COLOR = Color.BLACK;
+    public static final double RUNNING_UNIT_NODE_WITH = 100;
+    public static final double RUNNING_UNIT_NODE_HEIGHT = 50;
+    public static final Color RUNNING_UNIT_NODE_STROKE_COLOR = Color.BLACK;
 
     // connection notes
-    public static double CONNECTION_STROKE_WIDTH = 3.0;
-    public static double CONNECTION_LINE_BREAK_FACTOR = 1.3;
+    public static final double CONNECTION_STROKE_WIDTH = 3.0;
+    public static final double CONNECTION_LINE_BREAK_FACTOR = 1.3;
 }

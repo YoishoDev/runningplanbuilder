@@ -2,8 +2,6 @@ package de.hirola.runningplanbuilder.model;
 
 import de.hirola.runningplanbuilder.Global;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

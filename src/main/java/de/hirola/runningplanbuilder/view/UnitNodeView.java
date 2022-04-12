@@ -35,6 +35,7 @@ public class UnitNodeView {
                 + " - "
                 + applicationResources.getString("unitNodeView.title"));
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }

@@ -1,7 +1,5 @@
 package de.hirola.runningplanbuilder.model;
 
-import javafx.scene.shape.Shape;
-
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
  * This software us licensed under the AGPL-3.0 or later.

@@ -4,8 +4,6 @@ import de.hirola.runningplanbuilder.Global;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
 
-import java.util.Objects;
-
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
  * This software us licensed under the AGPL-3.0 or later.
@@ -60,7 +58,7 @@ public class SimpleLineConnectionNode extends Line implements EditorNode {
         setStartY(startPoint.getY());
         setEndX(endPoint.getX());
         setEndY(endPoint.getY());
-        setFill(Global.CONNECTION_COLOR);
+        setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
         setStrokeWidth(Global.CONNECTION_STROKE_WIDTH);
     }
 
