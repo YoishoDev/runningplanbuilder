@@ -3,7 +3,8 @@ module de.hirola.runningplanbuilder {
     requires javafx.fxml;
 
     requires org.jetbrains.annotations;
-    requires sports.library;
+    requires sportslibrary;
+    requires com.fasterxml.jackson.core;
 
     opens de.hirola.runningplanbuilder to javafx.fxml;
     opens de.hirola.runningplanbuilder.controller to javafx.fxml;

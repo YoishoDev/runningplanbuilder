@@ -28,8 +28,9 @@ public class RunningPlanBuilder extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(RunningPlanBuilder.class.getResource("main-view.fxml"));
         // TODO: use last size
         // Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        Scene scene;
         try {
-            Scene scene = new Scene(fxmlLoader.load(), 1000, 800);
+            scene = new Scene(fxmlLoader.load(), 1000, 800);
         } catch (IOException exception) {
             //TODO: Logging and extended messages
             throw new RuntimeException(exception);

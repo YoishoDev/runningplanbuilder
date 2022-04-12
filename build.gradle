@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'de.hirola'
-version '0.1-SNAPSHOT'
+version '0.1'
 
 repositories {
     mavenCentral()
@@ -28,7 +28,7 @@ tasks.withType(JavaCompile) {
 
 application {
     mainModule = 'de.hirola.runningplanbuilder'
-    mainClass = 'de.hirola.runningplanbuilder.HelloApplication'
+    mainClass = 'de.hirola.runningplanbuilder.RunningPlanBuilder'
 }
 
 javafx {
@@ -41,7 +41,7 @@ dependencies {
     implementation('com.dlsc.formsfx:formsfx-core:11.5.0') {
         exclude(group: 'org.openjfx')
     }
-    implementation 'de.hirola:sports-library:0.1-SNAPSHOT'
+    implementation 'de.hirola:sportslibrary:0.1-SNAPSHOT'
     implementation 'org.tinylog:tinylog-impl:2.5.0-M1.1'
     implementation 'org.tinylog:tinylog-api:2.5.0-M1.1'
     implementation 'org.dizitart:nitrite:3.4.3'
