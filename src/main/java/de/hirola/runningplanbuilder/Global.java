@@ -14,6 +14,8 @@ import javafx.scene.paint.Color;
  */
 public final class Global {
 
+    public static final String PACKAGE_NAME = Global.class.getPackageName();
+
     public static final boolean NODES_MOVABLE = false;
 
     // application parameter - can be overwritten by the user

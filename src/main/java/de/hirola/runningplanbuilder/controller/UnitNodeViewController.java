@@ -2,12 +2,15 @@ package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.sportslibrary.SportsLibrary;
 import de.hirola.sportslibrary.model.MovementType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -121,6 +124,9 @@ public class UnitNodeViewController {
 
     private void fillMovementTypeComboBox() {
 
+        // load movement types from data store
+
+        List<MovementType> movementTypes;
         weekDayComboBox.getItems().add(6, applicationResources.getString("sunday"));
         // select the monday
         weekDayComboBox.getSelectionModel().select(0);

@@ -1,6 +1,8 @@
 package de.hirola.runningplanbuilder.view;
 
 import de.hirola.runningplanbuilder.RunningPlanBuilder;
+import de.hirola.runningplanbuilder.controller.EditorViewController;
+import de.hirola.runningplanbuilder.controller.MainViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

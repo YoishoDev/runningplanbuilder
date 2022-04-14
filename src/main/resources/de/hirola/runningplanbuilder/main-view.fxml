@@ -45,17 +45,20 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.hirola.runningplanbuilder.controller.MainViewController">
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="de.hirola.runningplanbuilder.controller.MainViewController">
     <MenuBar fx:id="mainMenuBar" VBox.vgrow="NEVER">
         <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
             <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
-            <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open…" />
+            <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open" />
             <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#onAction" text="Save" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem fx:id="menuItemQuit" mnemonicParsing="false" onAction="#onAction" text="Quit" />
         </Menu>
         <Menu fx:id="menuEdit" mnemonicParsing="false" text="Edit">
-            <MenuItem fx:id="menuItemPreferences" mnemonicParsing="false" onAction="#onAction" text="Preferences…" />
+            <MenuItem fx:id="menuItemEditTemplate" mnemonicParsing="false" onAction="#onAction" text="Edit Template" />
+            <MenuItem fx:id="menuItemEditPreferences" mnemonicParsing="false" onAction="#onAction" text="Preferences" />
         </Menu>
         <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">
             <MenuItem fx:id="menuItemDebug" mnemonicParsing="false" onAction="#onAction" text="Debug" />

@@ -40,7 +40,7 @@ public class TemplateViewController {
     @FXML
     private Label remarksTextFieldLabel;
     @FXML
-    private TextField remarksTextField;
+    private TextArea remarksTextArea;
     @FXML
     private Button saveButton;
     @FXML
@@ -69,9 +69,7 @@ public class TemplateViewController {
             saveRunningPlanTemplate();
         }
         if (event.getSource().equals(closeButton)) {
-            // get a handle to the stage
-            Stage stage = (Stage) closeButton.getScene().getWindow();
-            stage.close();
+            close();
         }
         if (event.getSource().equals(orderNumberComboBox)) {
             // combo box index begins with 0
@@ -99,7 +97,7 @@ public class TemplateViewController {
     private void showRunningPlanTemplateInView() {
         if (runningPlanTemplate != null) {
             nameTextField.setText(runningPlanTemplate.getName());
-            remarksTextField.setText(runningPlanTemplate.getRemarks());
+            remarksTextArea.setText(runningPlanTemplate.getRemarks());
             orderNumber = runningPlanTemplate.getOrderNumber();
             // select the order number in combo box
             if (orderNumberComboBox.getItems().size() < orderNumber
@@ -116,7 +114,7 @@ public class TemplateViewController {
 
     private void saveRunningPlanTemplate() {
         boolean nameTextFieldIsEmpty = nameTextField.getText().isEmpty();
-        boolean remarksTextFieldIsEmpty = remarksTextField.getText().isEmpty();
+        boolean remarksTextFieldIsEmpty = remarksTextArea.getText().isEmpty();
         if (runningPlanTemplate == null) {
             // a new template should be created
             if (nameTextFieldIsEmpty) {
@@ -130,7 +128,7 @@ public class TemplateViewController {
             }
             runningPlanTemplate = new RunningPlanTemplate();
             runningPlanTemplate.setName(nameTextField.getText());
-            runningPlanTemplate.setRemarks(remarksTextField.getText());
+            runningPlanTemplate.setRemarks(remarksTextArea.getText());
         } else {
             // a existing template should be updated
            if (!nameTextFieldIsEmpty) {
@@ -150,14 +148,23 @@ public class TemplateViewController {
                alert.getButtonTypes().setAll(okButton, cancelButton);
                alert.showAndWait().ifPresent(type -> {
                    if (type == ButtonType.OK) {
-                       runningPlanTemplate.setRemarks(remarksTextField.getText());
+                       runningPlanTemplate.setRemarks(remarksTextArea.getText());
                    } else {
                        alert.close();
                    }
                });
+           } else {
+               runningPlanTemplate.setRemarks(remarksTextArea.getText());
            }
         }
         runningPlanTemplate.setOrderNumber(orderNumber);
         mainViewController.setRunningPlanTemplate(runningPlanTemplate);
+        close();
+    }
+
+    private void close() {
+        // get a handle to the stage
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 }

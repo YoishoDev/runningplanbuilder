@@ -7,7 +7,10 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="720.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.hirola.runningplanbuilder.controller.UnitNodeViewController">
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="430.0" prefWidth="720.0"
+            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="de.hirola.runningplanbuilder.controller.UnitNodeViewController">
    <Label fx:id="weekDayComboBoxLabel" layoutX="40.0" layoutY="141.0" prefHeight="40.0" prefWidth="120.0" text="Laufeinheit am:">
       <font>
          <Font size="14.0" />
@@ -33,6 +36,6 @@
       </font>
    </Label>
    <TextField fx:id="durationTextField" layoutX="180.0" layoutY="269.0" />
-   <Button fx:id="saveButton" onAction="#onAction" layoutX="40.0" layoutY="365.0" mnemonicParsing="false" prefWidth="80.0" text="Speichern" />
-   <Button fx:id="closeButton" onAction="#onAction" layoutX="600.0" layoutY="365.0" mnemonicParsing="false" prefWidth="80.0" text="Schliessen" />
+   <Button fx:id="saveButton" onAction="#onAction" layoutX="40.0" layoutY="365.0" mnemonicParsing="false" prefWidth="120.0" text="Speichern" />
+   <Button fx:id="closeButton" onAction="#onAction" layoutX="560.0" layoutY="365.0" mnemonicParsing="false" prefWidth="120.0" text="Schliessen" />
 </AnchorPane>

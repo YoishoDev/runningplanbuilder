@@ -5,6 +5,9 @@ import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.TemplateView;
 import de.hirola.sportslibrary.SportsLibrary;
+import de.hirola.sportslibrary.SportsLibraryException;
+import de.hirola.sportslibrary.database.DataRepository;
+import de.hirola.sportslibrary.model.MovementType;
 import de.hirola.sportslibrary.util.RunningPlanTemplate;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
@@ -24,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -36,7 +40,7 @@ import java.io.IOException;
  */
 public class MainViewController {
 
-    private SportsLibrary sportsLibrary;
+    private DataRepository dataRepository;
     private RunningPlanTemplate runningPlanTemplate; // actual template for the application
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
@@ -77,7 +81,10 @@ public class MainViewController {
     private Menu menuEdit; // edit menu
     @FXML
     // the reference will be injected by the FXML loader
-    private MenuItem menuItemPreferences;
+    private MenuItem menuItemEditTemplate;
+    @FXML
+    // the reference will be injected by the FXML loader
+    private MenuItem menuItemEditPreferences;
     @FXML
     // the reference will be injected by the FXML loader
     private Menu menuHelp; // help menu
@@ -114,10 +121,6 @@ public class MainViewController {
 
     public MainViewController() {}
 
-    public void setSportsLibrary(SportsLibrary sportsLibrary) {
-        this.sportsLibrary = sportsLibrary;
-    }
-
     public void setHostServices(@NotNull HostServices hostServices) {
         this.hostServices = hostServices;
     }
@@ -131,9 +134,14 @@ public class MainViewController {
         this.runningPlanTemplate = runningPlanTemplate;
         nodesCanBeAdded = runningPlanTemplate != null;
         if (nodesCanBeAdded) {
-            // enable save menu item
+            // enable different menu item
             menuItemSave.setDisable(false);
+            menuItemEditTemplate.setDisable(false);
         }
+    }
+
+    public List<MovementType> getMovementTypes() {
+        return null;
     }
 
     public void nodeWasDeleted(EditorNode node) {
@@ -166,12 +174,20 @@ public class MainViewController {
         runningPlanTemplateNodeMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
         stopNodeMenuElement.setFill(Global.STOP_CIRCLE_COLOR);
         runningUnitNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
-        // disable save menu item
+        // disable different menu items
         menuItemSave.setDisable(true);
+        menuItemEditTemplate.setDisable(true);
         // localisation the menu (item) labels
         setMenuLabel();
         // localisation the tool "menu" item labels
         setToolMenuLabel();
+        // initialize the sports library
+        try {
+            SportsLibrary sportsLibrary = new SportsLibrary(Global.PACKAGE_NAME, null);
+            dataRepository = sportsLibrary.getDataRepository();
+        } catch (SportsLibraryException exception) {
+            //TODO: Alert
+        }
     }
 
     private void setMenuLabel() {
@@ -181,7 +197,8 @@ public class MainViewController {
         menuItemSave.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemSave"));
         menuItemQuit.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemQuit"));
         menuEdit.setText(applicationResources.getString("mainMenuBar.menuEdit"));
-        menuItemPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
+        menuItemEditTemplate.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemTemplate"));
+        menuItemEditPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
         menuHelp.setText(applicationResources.getString("mainMenuBar.menuHelp"));
         menuItemDebug.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemDebug"));
         menuItemAbout.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemAbout"));
@@ -199,7 +216,7 @@ public class MainViewController {
     private void onAction(ActionEvent event) {
         if (event.getSource().equals(menuItemNew)) {
             //TODO unsaved values - ask user
-            createNewTemplate();
+            showTemplateView();
         }
         if (event.getSource().equals(menuItemOpen)) {
             //TODO unsaved values - ask user
@@ -212,6 +229,9 @@ public class MainViewController {
             //TODO: unsaved values - ask user
             Stage stage = (Stage) mainSplitPane.getScene().getWindow();
             stage.close();
+        }
+        if (event.getSource().equals(menuItemEditTemplate)) {
+            showTemplateView();
         }
         if (event.getSource().equals(menuItemDebug)) {
             showDebugDialog();
@@ -227,7 +247,7 @@ public class MainViewController {
 
         if (event.getSource().equals(runningPlanTemplateNodeMenuElement)) {
             // create a new running plan template
-            createNewTemplate();
+            showTemplateView();
         }
 
         // create a customized rectangle object in editor pane
@@ -389,6 +409,19 @@ public class MainViewController {
         firstNode.setSuccessorNode(secondNode);
     }
 
+    private void showTemplateView() {
+        // show dialog
+        if (templateView == null) {
+            templateView = new TemplateView(this, applicationResources);
+        }
+        try {
+            templateView.showView();
+        } catch (IOException exception) {
+            //TODO: Alert
+            exception.printStackTrace();
+        }
+    }
+
     private void showDebugDialog() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(applicationResources.getString("app.name")
@@ -417,19 +450,6 @@ public class MainViewController {
         vBox.getChildren().addAll(label, hyperlink);
         alert.getDialogPane().contentProperty().set(vBox);
         alert.showAndWait();
-    }
-
-    private void createNewTemplate() {
-        // show dialog
-        if (templateView == null) {
-            templateView = new TemplateView(this, applicationResources);
-        }
-        try {
-            templateView.showView();
-        } catch (IOException exception) {
-            //TODO: Alert
-            exception.printStackTrace();
-        }
     }
 
     private void importJSONFromFile() {
