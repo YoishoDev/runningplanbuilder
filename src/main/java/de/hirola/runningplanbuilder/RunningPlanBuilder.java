@@ -2,15 +2,14 @@ package de.hirola.runningplanbuilder;
 
 import de.hirola.runningplanbuilder.controller.MainViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.SportsLibrary;
-import de.hirola.sportslibrary.SportsLibraryException;
-import de.hirola.sportslibrary.database.DataRepository;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -25,7 +24,10 @@ public class RunningPlanBuilder extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         ApplicationResources applicationResources = ApplicationResources.getInstance();
-        FXMLLoader fxmlLoader = new FXMLLoader(RunningPlanBuilder.class.getResource("main-view.fxml"));
+        URL fxmlURL = getClass()
+                .getClassLoader()
+                .getResource("main-view.fxml");
+        FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         // TODO: use last size
         // Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         Scene scene = new Scene(fxmlLoader.load(), 1000, 800);

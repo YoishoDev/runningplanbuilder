@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ import java.util.List;
  */
 public class UnitNodeViewController {
 
+    private SportsLibrary sportsLibrary;
+    private List<MovementType> movementTypes;
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
 
@@ -42,7 +45,9 @@ public class UnitNodeViewController {
     @FXML
     private Label movementTypeComboBoxLabel;
     @FXML
-    private ComboBox<MovementType> movementTypeComboBox;
+    private ComboBox<String> movementTypeComboBox;
+    @FXML
+    private Label movementTypePaceLabel;
     @FXML
     private Label durationTextFieldLabel;
     @FXML
@@ -54,6 +59,14 @@ public class UnitNodeViewController {
 
     public UnitNodeViewController() {}
 
+    public void setSportsLibrary(@NotNull SportsLibrary sportsLibrary) {
+        this.sportsLibrary = sportsLibrary;
+        movementTypes = sportsLibrary.getMovementTypes();
+        // on initialize, the library is null
+        // we fill the box here
+        fillMovementTypeComboBox();
+    }
+
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
@@ -62,7 +75,6 @@ public class UnitNodeViewController {
         // fill combo boxes
         fillWeekDayComboBox();
         fillWeekComboBox();
-        fillMovementTypeComboBox();
         // only numbers allowed in text field, thanks to https://stackoverflow.com/a/53876601
         durationTextField.setTextFormatter(new TextFormatter<>(c -> {
             if (!c.getControlNewText().matches("\\d*"))
@@ -88,6 +100,11 @@ public class UnitNodeViewController {
         if (event.getSource().equals(weekDayComboBox)) {
             int weekday = weekDayComboBox.getSelectionModel().getSelectedIndex();
             System.out.println(weekday + 1);
+        }
+        if (event.getSource().equals(movementTypeComboBox)) {
+            //TODO: user preferences: km/h or pace
+            int index = movementTypeComboBox.getSelectionModel().getSelectedIndex();
+            showPaceForIndex(index);
         }
     }
 
@@ -123,13 +140,30 @@ public class UnitNodeViewController {
     }
 
     private void fillMovementTypeComboBox() {
+        int index = 0;
+        for (MovementType movementType: movementTypes) {
+           movementTypeComboBox.getItems().add(index, movementType.getName());
+           index++;
+        }
+        movementTypeComboBox.getSelectionModel().select(0);
+        showPaceForIndex(0);
 
-        // load movement types from data store
+    }
 
-        List<MovementType> movementTypes;
-        weekDayComboBox.getItems().add(6, applicationResources.getString("sunday"));
-        // select the monday
-        weekDayComboBox.getSelectionModel().select(0);
+    private void showPaceForIndex(int index) {
+        if (movementTypes.size() > index) {
+            MovementType movementType = movementTypes.get(index);
+            double pace = movementType.getPace();
+            if (pace > 0.0) {
+                String labelText = applicationResources
+                        .getString("unitNodeView.movementTypePaceLabelText.prefix")
+                        + " "
+                        + pace;
+                movementTypePaceLabel.setText(labelText);
+            } else {
+                movementTypePaceLabel.setText("");
+            }
+        }
     }
 
     private void showRunningUnitInView() {

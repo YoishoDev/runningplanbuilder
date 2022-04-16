@@ -6,7 +6,6 @@ import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.TemplateView;
 import de.hirola.sportslibrary.SportsLibrary;
 import de.hirola.sportslibrary.SportsLibraryException;
-import de.hirola.sportslibrary.database.DataRepository;
 import de.hirola.sportslibrary.model.MovementType;
 import de.hirola.sportslibrary.util.RunningPlanTemplate;
 import javafx.application.HostServices;
@@ -26,6 +25,7 @@ import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class MainViewController {
 
-    private DataRepository dataRepository;
+    private SportsLibrary sportsLibrary;
     private RunningPlanTemplate runningPlanTemplate; // actual template for the application
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
@@ -121,6 +121,10 @@ public class MainViewController {
 
     public MainViewController() {}
 
+    public SportsLibrary getSportsLibrary() {
+        return sportsLibrary;
+    }
+
     public void setHostServices(@NotNull HostServices hostServices) {
         this.hostServices = hostServices;
     }
@@ -167,7 +171,11 @@ public class MainViewController {
 
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
-    private void initialize() {
+    private void initialize() throws InstantiationException, SportsLibraryException {
+        //TODO: get debug mode from preferences
+        // initialize sports library
+        File appDirectory = SportsLibrary.initializeAppDirectory(Global.PACKAGE_NAME);
+        sportsLibrary = SportsLibrary.getInstance(true, appDirectory, null);
         // initialize the controller for editor pane
         editorViewController = new EditorViewController(this, editorAnchorPane);
         // set nodes to javax default colors
@@ -181,13 +189,6 @@ public class MainViewController {
         setMenuLabel();
         // localisation the tool "menu" item labels
         setToolMenuLabel();
-        // initialize the sports library
-        try {
-            SportsLibrary sportsLibrary = new SportsLibrary(Global.PACKAGE_NAME, null);
-            dataRepository = sportsLibrary.getDataRepository();
-        } catch (SportsLibraryException exception) {
-            //TODO: Alert
-        }
     }
 
     private void setMenuLabel() {

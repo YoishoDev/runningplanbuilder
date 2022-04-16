@@ -1,18 +1,17 @@
 package de.hirola.runningplanbuilder.view;
 
-import de.hirola.runningplanbuilder.RunningPlanBuilder;
+import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.controller.MainViewController;
 import de.hirola.runningplanbuilder.controller.TemplateViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.util.RunningPlanTemplate;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -36,7 +35,10 @@ public class TemplateView {
     }
 
     public void showView() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(RunningPlanBuilder.class.getResource("template-view.fxml"));
+        URL fxmlURL = getClass()
+                .getClassLoader()
+                .getResource("template-view.fxml");
+        FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load());
         // transfer of parameters to the main view controller

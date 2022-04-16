@@ -6,6 +6,7 @@ import de.hirola.runningplanbuilder.model.PointNode;
 import de.hirola.runningplanbuilder.model.RunningUnitNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.UnitNodeView;
+import de.hirola.sportslibrary.SportsLibrary;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -41,6 +42,8 @@ public class EditorViewController {
     private final ApplicationResources applicationResources  // bundle for localisation, ...
             = ApplicationResources.getInstance();
     private final MainViewController mainViewController;
+
+    private SportsLibrary sportsLibrary;
     private UnitNodeView unitNodeView;
     private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
@@ -60,7 +63,7 @@ public class EditorViewController {
                 // open the edit view on double click
                 if (event.getClickCount() == 2) {
                     if (unitNodeView == null) {
-                        unitNodeView = new UnitNodeView();
+                        unitNodeView = new UnitNodeView(sportsLibrary);
                     }
                     try {
                         unitNodeView.showView();
@@ -124,7 +127,7 @@ public class EditorViewController {
                     if (event.getSource().equals(nodeContextMenuItemEdit)
                             && sourceOfContextMenu instanceof RunningUnitNode) {
                         if (unitNodeView == null) {
-                            unitNodeView = new UnitNodeView();
+                            unitNodeView = new UnitNodeView(sportsLibrary);
                         }
                         try {
                             unitNodeView.showView();
@@ -218,6 +221,7 @@ public class EditorViewController {
         this.mainViewController = mainViewController;
         this.editorAnchorPane = editorAnchorPane;
         connectionShouldBeCreated = false;
+        sportsLibrary = mainViewController.getSportsLibrary();
         createContextMenuForNodes();
     }
 

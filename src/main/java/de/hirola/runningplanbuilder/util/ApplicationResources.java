@@ -55,6 +55,6 @@ public final class ApplicationResources
 	}
 
 	private ApplicationResources() {
-		resourceBundle = ResourceBundle.getBundle(RunningPlanBuilder.class.getName());
+		resourceBundle = ResourceBundle.getBundle(RunningPlanBuilder.class.getSimpleName());
 	}
 }
