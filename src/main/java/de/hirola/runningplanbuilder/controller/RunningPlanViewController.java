@@ -2,7 +2,7 @@ package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.util.RunningPlanTemplate;
+import de.hirola.sportslibrary.model.RunningPlan;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -18,9 +18,9 @@ import org.jetbrains.annotations.NotNull;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class TemplateViewController {
+public class RunningPlanViewController {
 
-    private RunningPlanTemplate runningPlanTemplate;
+    private RunningPlan runningPlan;
     private int orderNumber = 1;
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
@@ -46,12 +46,12 @@ public class TemplateViewController {
     @FXML
     private Button closeButton;
 
-    public TemplateViewController() {}
+    public RunningPlanViewController() {}
 
     public void setMainViewController(@NotNull MainViewController mainViewController) {
         this.mainViewController = mainViewController;
-        runningPlanTemplate = mainViewController.getRunningPlanTemplate(); // can be null
-        showRunningPlanTemplateInView(); // show the data from template (if not null)
+        runningPlan = mainViewController.getRunningPlan(); // can be null
+        showRunningPlanInView(); // show the data from template (if not null)
     }
 
     @FXML
@@ -59,14 +59,14 @@ public class TemplateViewController {
     private void initialize() {
         setLabel();
         fillOrderNumberComboBox();
-        showRunningPlanTemplateInView(); // if unit not null, given from node
+        showRunningPlanInView(); // if unit not null, given from node
     }
 
     @FXML
     // use for onAction by the FXML loader
     private void onAction(ActionEvent event) {
         if (event.getSource().equals(saveButton)) {
-            saveRunningPlanTemplate();
+            saveRunningPlan();
         }
         if (event.getSource().equals(closeButton)) {
             close();
@@ -94,11 +94,11 @@ public class TemplateViewController {
         orderNumberComboBox.getSelectionModel().select(0);
     }
 
-    private void showRunningPlanTemplateInView() {
-        if (runningPlanTemplate != null) {
-            nameTextField.setText(runningPlanTemplate.getName());
-            remarksTextArea.setText(runningPlanTemplate.getRemarks());
-            orderNumber = runningPlanTemplate.getOrderNumber();
+    private void showRunningPlanInView() {
+        if (runningPlan != null) {
+            nameTextField.setText(runningPlan.getName());
+            remarksTextArea.setText(runningPlan.getRemarks());
+            orderNumber = runningPlan.getOrderNumber();
             // select the order number in combo box
             if (orderNumberComboBox.getItems().size() < orderNumber
                     && Global.MAX_ORDER_NUMBER >= orderNumber) {
@@ -112,10 +112,10 @@ public class TemplateViewController {
         }
     }
 
-    private void saveRunningPlanTemplate() {
+    private void saveRunningPlan() {
         boolean nameTextFieldIsEmpty = nameTextField.getText().isEmpty();
         boolean remarksTextFieldIsEmpty = remarksTextArea.getText().isEmpty();
-        if (runningPlanTemplate == null) {
+        if (runningPlan == null) {
             // a new template should be created
             if (nameTextFieldIsEmpty) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -126,16 +126,16 @@ public class TemplateViewController {
                 alert.showAndWait();
                 return;
             }
-            runningPlanTemplate = new RunningPlanTemplate();
-            runningPlanTemplate.setName(nameTextField.getText());
-            runningPlanTemplate.setRemarks(remarksTextArea.getText());
+            runningPlan = new RunningPlan();
+            runningPlan.setName(nameTextField.getText());
+            runningPlan.setRemarks(remarksTextArea.getText());
         } else {
-            // a existing template should be updated
+            // an existing template should be updated
            if (!nameTextFieldIsEmpty) {
                // update the name only if not empty
-               runningPlanTemplate.setName(nameTextField.getText());
+               runningPlan.setName(nameTextField.getText());
            }
-           if (remarksTextFieldIsEmpty && !runningPlanTemplate.getRemarks().isEmpty()) {
+           if (remarksTextFieldIsEmpty && !runningPlan.getRemarks().isEmpty()) {
                Alert alert = new Alert(Alert.AlertType.WARNING);
                alert.setTitle(applicationResources.getString("app.name")
                        + " "
@@ -148,17 +148,17 @@ public class TemplateViewController {
                alert.getButtonTypes().setAll(okButton, cancelButton);
                alert.showAndWait().ifPresent(type -> {
                    if (type == ButtonType.OK) {
-                       runningPlanTemplate.setRemarks(remarksTextArea.getText());
+                       runningPlan.setRemarks(remarksTextArea.getText());
                    } else {
                        alert.close();
                    }
                });
            } else {
-               runningPlanTemplate.setRemarks(remarksTextArea.getText());
+               runningPlan.setRemarks(remarksTextArea.getText());
            }
         }
-        runningPlanTemplate.setOrderNumber(orderNumber);
-        mainViewController.setRunningPlanTemplate(runningPlanTemplate);
+        runningPlan.setOrderNumber(orderNumber);
+        mainViewController.setRunningPlan(runningPlan);
         close();
     }
 

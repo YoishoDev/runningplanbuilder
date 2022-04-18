@@ -10,7 +10,7 @@
 <?import javafx.scene.control.TextArea?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="450.0" prefWidth="720.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="de.hirola.runningplanbuilder.controller.TemplateViewController">
+            fx:controller="de.hirola.runningplanbuilder.controller.RunningPlanViewController">
    <Label fx:id="nameTextFieldLabel" layoutX="40.0" layoutY="141.0" prefHeight="40.0" prefWidth="120.0" text="Name:">
       <font>
          <Font size="14.0" />

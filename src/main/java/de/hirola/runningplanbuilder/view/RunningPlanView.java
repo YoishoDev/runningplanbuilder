@@ -1,8 +1,7 @@
 package de.hirola.runningplanbuilder.view;
 
-import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.controller.MainViewController;
-import de.hirola.runningplanbuilder.controller.TemplateViewController;
+import de.hirola.runningplanbuilder.controller.RunningPlanViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,13 +22,13 @@ import java.net.URL;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class TemplateView {
+public class RunningPlanView {
 
     private final ApplicationResources applicationResources;
     private final MainViewController mainViewController;
 
-    public TemplateView(@NotNull MainViewController mainViewController,
-                        @NotNull ApplicationResources applicationResources) {
+    public RunningPlanView(@NotNull MainViewController mainViewController,
+                           @NotNull ApplicationResources applicationResources) {
         this.applicationResources = applicationResources;
         this.mainViewController = mainViewController;
     }
@@ -37,14 +36,14 @@ public class TemplateView {
     public void showView() throws IOException {
         URL fxmlURL = getClass()
                 .getClassLoader()
-                .getResource("template-view.fxml");
+                .getResource("running-plan-view.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load());
         // transfer of parameters to the main view controller
-        TemplateViewController templateViewController = fxmlLoader.getController();
+        RunningPlanViewController runningPlanViewController = fxmlLoader.getController();
         // needed to get data from main view controller
-        templateViewController.setMainViewController(mainViewController);
+        runningPlanViewController.setMainViewController(mainViewController);
         stage.setTitle(applicationResources.getString("app.name")
                 + " - "
                 + applicationResources.getString("templateView.title"));

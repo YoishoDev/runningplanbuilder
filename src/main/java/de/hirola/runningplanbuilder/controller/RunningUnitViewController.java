@@ -1,15 +1,16 @@
 package de.hirola.runningplanbuilder.controller;
 
-import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.sportslibrary.SportsLibrary;
 import de.hirola.sportslibrary.model.MovementType;
+import de.hirola.sportslibrary.model.RunningUnit;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -22,10 +23,11 @@ import java.util.List;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class UnitNodeViewController {
-
+public class RunningUnitViewController {
     private SportsLibrary sportsLibrary;
-    private List<MovementType> movementTypes;
+    private RunningUnit runningUnit; // the running unit for the view
+    private List<MovementType> movementTypes; // list of all movement types
+    private MovementType movementType; // selected movement type
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
 
@@ -34,14 +36,6 @@ public class UnitNodeViewController {
     private AnchorPane anchorPane;
     @FXML
     private Label infoLabel;
-    @FXML
-    private Label weekDayComboBoxLabel;
-    @FXML
-    private ComboBox<String> weekDayComboBox;
-    @FXML
-    private Label weekComboBoxLabel;
-    @FXML
-    private ComboBox<String> weekComboBox;
     @FXML
     private Label movementTypeComboBoxLabel;
     @FXML
@@ -57,7 +51,7 @@ public class UnitNodeViewController {
     @FXML
     private Button closeButton;
 
-    public UnitNodeViewController() {}
+    public RunningUnitViewController() {}
 
     public void setSportsLibrary(@NotNull SportsLibrary sportsLibrary) {
         this.sportsLibrary = sportsLibrary;
@@ -67,14 +61,20 @@ public class UnitNodeViewController {
         fillMovementTypeComboBox();
     }
 
+    @Nullable
+    public RunningUnit getRunningUnit() {
+        return runningUnit;
+    }
+
+    public void setRunningUnit(@Nullable RunningUnit runningUnit) {
+        this.runningUnit = runningUnit;
+    }
+
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
         // localisation for texte
         setLabel();
-        // fill combo boxes
-        fillWeekDayComboBox();
-        fillWeekComboBox();
         // only numbers allowed in text field, thanks to https://stackoverflow.com/a/53876601
         durationTextField.setTextFormatter(new TextFormatter<>(c -> {
             if (!c.getControlNewText().matches("\\d*"))
@@ -83,7 +83,6 @@ public class UnitNodeViewController {
                 return c;
         }
         ));
-        showRunningUnitInView(); // if unit not null, given from node
     }
 
     @FXML
@@ -91,52 +90,27 @@ public class UnitNodeViewController {
     private void onAction(ActionEvent event) {
         if (event.getSource().equals(saveButton)) {
             saveRunningUnit();
+            return;
         }
         if (event.getSource().equals(closeButton)) {
             // get a handle to the stage
             Stage stage = (Stage) closeButton.getScene().getWindow();
             stage.close();
-        }
-        if (event.getSource().equals(weekDayComboBox)) {
-            int weekday = weekDayComboBox.getSelectionModel().getSelectedIndex();
-            System.out.println(weekday + 1);
+            return;
         }
         if (event.getSource().equals(movementTypeComboBox)) {
             //TODO: user preferences: km/h or pace
             int index = movementTypeComboBox.getSelectionModel().getSelectedIndex();
-            showPaceForIndex(index);
+            setMovementType(index); // set the selected movement type and show the pace for the type
         }
     }
 
     private void setLabel() {
-        infoLabel.setText(applicationResources.getString("unitNodeView.infoText"));
-        weekDayComboBoxLabel.setText(applicationResources.getString("unitNodeView.weekDayLabelText"));
-        weekComboBoxLabel.setText(applicationResources.getString("unitNodeView.weekLabelText"));
-        movementTypeComboBoxLabel.setText(applicationResources.getString("unitNodeView.movementTypeLabelText"));
-        durationTextFieldLabel.setText(applicationResources.getString("unitNodeView.durationLabelText"));
-        saveButton.setText(applicationResources.getString("unitNodeView.saveButtonText"));
-        closeButton.setText(applicationResources.getString("unitNodeView.closeButtonText"));
-    }
-
-    private void fillWeekDayComboBox() {
-        weekDayComboBox.getItems().add(0, applicationResources.getString("monday"));
-        weekDayComboBox.getItems().add(1, applicationResources.getString("tuesday"));
-        weekDayComboBox.getItems().add(2, applicationResources.getString("wednesday"));
-        weekDayComboBox.getItems().add(3, applicationResources.getString("thursday"));
-        weekDayComboBox.getItems().add(4, applicationResources.getString("friday"));
-        weekDayComboBox.getItems().add(5, applicationResources.getString("saturday"));
-        weekDayComboBox.getItems().add(6, applicationResources.getString("sunday"));
-        // select the monday
-        weekDayComboBox.getSelectionModel().select(0);
-    }
-
-    private void fillWeekComboBox() {
-        for (int i = 0; i < Global.MAX_COUNT_OF_WEEKS; i++) {
-            weekComboBox.getItems().add(i,
-                    applicationResources.getString("misc.week") + " " + (i + 1));
-        }
-        // select the first week
-        weekComboBox.getSelectionModel().select(0);
+        infoLabel.setText(applicationResources.getString("runningUnitView.infoText"));
+        movementTypeComboBoxLabel.setText(applicationResources.getString("runningUnitView.movementTypeLabelText"));
+        durationTextFieldLabel.setText(applicationResources.getString("runningUnitView.durationLabelText"));
+        saveButton.setText(applicationResources.getString("runningUnitView.saveButtonText"));
+        closeButton.setText(applicationResources.getString("runningUnitView.closeButtonText"));
     }
 
     private void fillMovementTypeComboBox() {
@@ -146,17 +120,17 @@ public class UnitNodeViewController {
            index++;
         }
         movementTypeComboBox.getSelectionModel().select(0);
-        showPaceForIndex(0);
+        setMovementType(0);
 
     }
 
-    private void showPaceForIndex(int index) {
+    private void setMovementType(int index) {
         if (movementTypes.size() > index) {
-            MovementType movementType = movementTypes.get(index);
+            movementType = movementTypes.get(index);
             double pace = movementType.getPace();
             if (pace > 0.0) {
                 String labelText = applicationResources
-                        .getString("unitNodeView.movementTypePaceLabelText.prefix")
+                        .getString("runningUnitView.movementTypePaceLabelText.prefix")
                         + " "
                         + pace;
                 movementTypePaceLabel.setText(labelText);
@@ -167,10 +141,46 @@ public class UnitNodeViewController {
     }
 
     private void showRunningUnitInView() {
-
+        if (runningUnit != null) {
+            // select the movement types
+            int index  = movementTypes.indexOf(runningUnit.getMovementType());
+            if (index > -1 && index < movementTypes.size()) {
+                movementTypeComboBox.getSelectionModel().select(index);
+                setMovementType(index);
+            } else {
+                if (sportsLibrary.isDebugMode()) {
+                    sportsLibrary.debug("Movement typ of running unit is not in sports library.");
+                }
+                //TODO: alert
+            }
+            durationTextField.setText(String.valueOf(runningUnit.getDuration()));
+        }
     }
 
     private void saveRunningUnit() {
+        // save values ton running unit
+        String durationString = durationTextField.getText();
+        if (durationString.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(applicationResources.getString("app.name")
+                    + " "
+                    + applicationResources.getString("app.version"));
+            alert.setHeaderText(applicationResources.getString("alert.template.emptyDuration"));
+            alert.showAndWait();
+            return;
+        }
+        // the dialog is open to add a new running unit to entry
+        if (runningUnit == null) {
+            runningUnit = new RunningUnit();
+        }
+        try {
+            runningUnit.setDuration(Long.parseLong(durationString));
+        } catch (NumberFormatException exception) {
+            //TODO: alert to user
+            runningUnit.setDuration(0);
+        }
+        runningUnit.setMovementType(movementType);
 
+        //TODO: user preferences, close on save
     }
 }

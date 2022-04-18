@@ -1,6 +1,7 @@
 package de.hirola.runningplanbuilder.model;
 
 import de.hirola.runningplanbuilder.Global;
+import de.hirola.sportslibrary.model.RunningPlanEntry;
 import javafx.scene.shape.Rectangle;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,14 +17,16 @@ import java.util.UUID;
  * @author Michael Schmidt (Hirola)
  * @since 0.1
  */
-public class RunningUnitNode extends Rectangle implements EditorNode {
+public class RunningPlanEntryNode extends Rectangle implements EditorNode {
 
     private final UUID uuid;
+    private RunningPlanEntry runningPlanEntry; // the unit of this node
     private EditorNode predecessorNode;
     private EditorNode successorNode;
 
-    public RunningUnitNode(double posX, double posY) {
+    public RunningPlanEntryNode(double posX, double posY) {
         uuid = UUID.randomUUID();
+        runningPlanEntry = new RunningPlanEntry();
         predecessorNode = null;
         successorNode = null;
         initialize(posX, posY);
@@ -51,6 +54,14 @@ public class RunningUnitNode extends Rectangle implements EditorNode {
         this.successorNode = successorNode;
     }
 
+    public RunningPlanEntry getRunningPlanEntry() {
+        return runningPlanEntry;
+    }
+
+    public void setRunningPlanEntry(RunningPlanEntry runningPlanEntry) {
+        this.runningPlanEntry = runningPlanEntry;
+    }
+
     private void initialize(double posX, double posY) {
         setX(posX);
         setY(posY);
@@ -69,7 +80,7 @@ public class RunningUnitNode extends Rectangle implements EditorNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RunningUnitNode that = (RunningUnitNode) o;
+        RunningPlanEntryNode that = (RunningPlanEntryNode) o;
         return Objects.equals(uuid, that.uuid);
     }
 
@@ -80,7 +91,7 @@ public class RunningUnitNode extends Rectangle implements EditorNode {
 
     @Override
     public String toString() {
-        return "RunningUnitNode{" +
+        return "RunningPlanEntryNode{" +
                 "uuid=" + uuid +
                 '}';
     }

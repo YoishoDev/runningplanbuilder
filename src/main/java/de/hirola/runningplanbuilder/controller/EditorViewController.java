@@ -3,9 +3,9 @@ package de.hirola.runningplanbuilder.controller;
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.EditorNode;
 import de.hirola.runningplanbuilder.model.PointNode;
-import de.hirola.runningplanbuilder.model.RunningUnitNode;
+import de.hirola.runningplanbuilder.model.RunningPlanEntryNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.runningplanbuilder.view.UnitNodeView;
+import de.hirola.runningplanbuilder.view.EntryNodeView;
 import de.hirola.sportslibrary.SportsLibrary;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -44,7 +44,8 @@ public class EditorViewController {
     private final MainViewController mainViewController;
 
     private SportsLibrary sportsLibrary;
-    private UnitNodeView unitNodeView;
+    private RunningPlanEntryNode runningPlanEntryNode; // selected running unit (node)
+    private EntryNodeView entryNodeView;
     private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
     private ContextMenu nodeContextMenu;
@@ -59,14 +60,16 @@ public class EditorViewController {
     // mouse click
     final EventHandler<MouseEvent> onMouseClickedEventHandler =
             event -> {
-
+                // get the selected running unit (node)
                 // open the edit view on double click
-                if (event.getClickCount() == 2) {
-                    if (unitNodeView == null) {
-                        unitNodeView = new UnitNodeView(sportsLibrary);
+                Object eventSource = event.getSource();
+                if (event.getClickCount() == 2 && eventSource instanceof RunningPlanEntryNode) {
+                    runningPlanEntryNode = (RunningPlanEntryNode) eventSource;
+                    if (entryNodeView == null) {
+                        entryNodeView = new EntryNodeView(sportsLibrary);
                     }
                     try {
-                        unitNodeView.showView();
+                        entryNodeView.showView(runningPlanEntryNode);
                     } catch (IOException exception) {
                         //TODO: Alert
                         exception.printStackTrace();
@@ -122,15 +125,16 @@ public class EditorViewController {
                 if (event.getSource() instanceof MenuItem) {
                     // get the source of the context menu
                     ContextMenu contextMenu = ((MenuItem) event.getSource()).getParentPopup();
-                    Node sourceOfContextMenu = contextMenu.getOwnerNode();
+                    Node ownerNode = contextMenu.getOwnerNode();
                     // context menu action from a running unit element
                     if (event.getSource().equals(nodeContextMenuItemEdit)
-                            && sourceOfContextMenu instanceof RunningUnitNode) {
-                        if (unitNodeView == null) {
-                            unitNodeView = new UnitNodeView(sportsLibrary);
+                            && ownerNode instanceof RunningPlanEntryNode) {
+                        runningPlanEntryNode = (RunningPlanEntryNode) ownerNode;
+                        if (entryNodeView == null) {
+                            entryNodeView = new EntryNodeView(sportsLibrary);
                         }
                         try {
-                            unitNodeView.showView();
+                            entryNodeView.showView(runningPlanEntryNode);
                         } catch (IOException exception) {
                             //TODO: Alert
                             exception.printStackTrace();
@@ -139,7 +143,7 @@ public class EditorViewController {
                     }
                     // context menu action from a running unit element
                     if (event.getSource().equals(nodeContextMenuItemDelete)) {
-                        deleteNode(sourceOfContextMenu);
+                        deleteNode(ownerNode);
                     }
                 }
             };
@@ -151,13 +155,13 @@ public class EditorViewController {
                 nodeContextMenuItemDelete.setDisable(false);
                 nodeContextMenuItemEdit.setDisable(false);
 
-                if (event.getSource() instanceof RunningUnitNode) {
+                if (event.getSource() instanceof RunningPlanEntryNode) {
                     // connected nodes can not be delete
-                    RunningUnitNode runningUnitNode = (RunningUnitNode) event.getSource();
-                    if (runningUnitNode.isRelated()) {
+                    RunningPlanEntryNode runningPlanEntryNode = (RunningPlanEntryNode) event.getSource();
+                    if (runningPlanEntryNode.isRelated()) {
                         nodeContextMenuItemDelete.setDisable(true);
                     }
-                    nodeContextMenu.show(runningUnitNode, Side.RIGHT, 5, 5);
+                    nodeContextMenu.show(runningPlanEntryNode, Side.RIGHT, 5, 5);
                 }
                 if (event.getSource() instanceof PointNode) {
                     // stop node can only be deleted
@@ -236,7 +240,7 @@ public class EditorViewController {
             ((Shape) node).setOnContextMenuRequested(onContextMenuRequestedEventHandler);
             // register with editor
             registeredNodes.add(node);
-            if (node instanceof RunningUnitNode) {
+            if (node instanceof RunningPlanEntryNode) {
                 if (!registeredNodes.contains(node)) {
                     // register for template
                     registeredNodes.add(node);
@@ -249,6 +253,13 @@ public class EditorViewController {
         registeredNodes.remove(node);
     }
 
+    public RunningPlanEntryNode getRunningUnitNode() {
+        return runningPlanEntryNode;
+    }
+
+    public void setRunningUnitNode(RunningPlanEntryNode runningPlanEntryNode) {
+        this.runningPlanEntryNode = runningPlanEntryNode;
+    }
     private void createContextMenuForNodes() {
         // creating a context menu
         nodeContextMenu = new ContextMenu();
@@ -283,7 +294,7 @@ public class EditorViewController {
                 unregisterNode((EditorNode) node);
             }
         }
-        if (node instanceof RunningUnitNode) {
+        if (node instanceof RunningPlanEntryNode) {
             // node cannot be deleted
             if (((EditorNode) node).isRelated()) {
                 return;

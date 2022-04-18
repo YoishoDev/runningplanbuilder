@@ -3,11 +3,11 @@ package de.hirola.runningplanbuilder.controller;
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.runningplanbuilder.view.TemplateView;
+import de.hirola.runningplanbuilder.view.RunningPlanView;
 import de.hirola.sportslibrary.SportsLibrary;
 import de.hirola.sportslibrary.SportsLibraryException;
 import de.hirola.sportslibrary.model.MovementType;
-import de.hirola.sportslibrary.util.RunningPlanTemplate;
+import de.hirola.sportslibrary.model.RunningPlan;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -41,11 +41,11 @@ import java.util.List;
 public class MainViewController {
 
     private SportsLibrary sportsLibrary;
-    private RunningPlanTemplate runningPlanTemplate; // actual template for the application
+    private RunningPlan runningPlan; // actual template for the application
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private HostServices hostServices;
-    private TemplateView templateView;
+    private RunningPlanView runningPlanView;
     private EditorViewController editorViewController; // handler for editor pane
     private PointNode startNode = null; // there can only be one in editor
     private PointNode stopNode = null; // there can only be one in editor
@@ -130,13 +130,13 @@ public class MainViewController {
     }
 
     @Nullable
-    public RunningPlanTemplate getRunningPlanTemplate() {
-        return runningPlanTemplate;
+    public RunningPlan getRunningPlan() {
+        return runningPlan;
     }
 
-    public void setRunningPlanTemplate(@Nullable RunningPlanTemplate runningPlanTemplate) {
-        this.runningPlanTemplate = runningPlanTemplate;
-        nodesCanBeAdded = runningPlanTemplate != null;
+    public void setRunningPlan(@Nullable RunningPlan runningPlan) {
+        this.runningPlan = runningPlan;
+        nodesCanBeAdded = runningPlan != null;
         if (nodesCanBeAdded) {
             // enable different menu item
             menuItemSave.setDisable(false);
@@ -264,36 +264,36 @@ public class MainViewController {
                 // create a new running node
                 // get the position for the next node
                 nodePos = getNodePosition();
-                RunningUnitNode runningUnitNode = new RunningUnitNode(nodePos.getX(), nodePos.getY());
+                RunningPlanEntryNode runningPlanEntryNode = new RunningPlanEntryNode(nodePos.getX(), nodePos.getY());
                 // set the start node as predecessor
-                runningUnitNode.setPredecessorNode(startNode);
+                runningPlanEntryNode.setPredecessorNode(startNode);
                 // set the running unit node as neighbour
-                startNode.setNeighborNode(runningUnitNode);
+                startNode.setNeighborNode(runningPlanEntryNode);
                 // create the connection between both nodes
-                createNodeConnection(startNode, runningUnitNode);
+                createNodeConnection(startNode, runningPlanEntryNode);
                 // add both nodes to editor pane
                 editorAnchorPane.getChildren().add(startNode);
-                editorAnchorPane.getChildren().add(runningUnitNode);
+                editorAnchorPane.getChildren().add(runningPlanEntryNode);
                 // remember the last added node
-                lastAddedNode = runningUnitNode;
+                lastAddedNode = runningPlanEntryNode;
                 // register both nodes with the editor controller
                 editorViewController.registerNode(startNode);
-                editorViewController.registerNode(runningUnitNode);
+                editorViewController.registerNode(runningPlanEntryNode);
                 return;
             }
             // add the next running unit node
             Point2D nodePos = getNodePosition();
-            RunningUnitNode runningUnitNode = new RunningUnitNode(nodePos.getX(), nodePos.getY());
+            RunningPlanEntryNode runningPlanEntryNode = new RunningPlanEntryNode(nodePos.getX(), nodePos.getY());
             // set the previous node as predecessor
-            runningUnitNode.setPredecessorNode(lastAddedNode);
+            runningPlanEntryNode.setPredecessorNode(lastAddedNode);
             // create the connection between both nodes
-            createNodeConnection(lastAddedNode, runningUnitNode);
+            createNodeConnection(lastAddedNode, runningPlanEntryNode);
             // add the node to editor pane
-            editorAnchorPane.getChildren().add(runningUnitNode);
+            editorAnchorPane.getChildren().add(runningPlanEntryNode);
             // remember the last added node
-            lastAddedNode = runningUnitNode;
+            lastAddedNode = runningPlanEntryNode;
             // register the node with the editor controller
-            editorViewController.registerNode(runningUnitNode);
+            editorViewController.registerNode(runningPlanEntryNode);
         }
 
         if (event.getSource().equals(stopNodeMenuElement) && stopNode == null) {
@@ -412,11 +412,11 @@ public class MainViewController {
 
     private void showTemplateView() {
         // show dialog
-        if (templateView == null) {
-            templateView = new TemplateView(this, applicationResources);
+        if (runningPlanView == null) {
+            runningPlanView = new RunningPlanView(this, applicationResources);
         }
         try {
-            templateView.showView();
+            runningPlanView.showView();
         } catch (IOException exception) {
             //TODO: Alert
             exception.printStackTrace();
