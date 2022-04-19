@@ -36,7 +36,7 @@ import java.util.List;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class MainViewController {
 

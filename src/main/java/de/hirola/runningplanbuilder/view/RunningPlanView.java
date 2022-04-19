@@ -20,7 +20,7 @@ import java.net.URL;
  * The view is created by SceneBuilder and using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class RunningPlanView {
 

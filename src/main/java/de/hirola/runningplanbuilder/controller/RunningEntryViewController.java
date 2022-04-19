@@ -1,7 +1,6 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
-import de.hirola.runningplanbuilder.model.RunningPlanEntryNode;
 import de.hirola.runningplanbuilder.model.RunningUnitTableObject;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.RunningUnitView;
@@ -13,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
@@ -31,13 +29,13 @@ import java.util.List;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
-public class EntryNodeViewController {
+public class RunningEntryViewController {
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private SportsLibrary sportsLibrary;
-    private RunningPlanEntryNode runningPlanEntryNode; // the node for the view
+    private RunningPlanEntry runningPlanEntry; // the entry for the view
     private List<RunningUnit> runningUnits; // list of all running units
     private ObservableList<RunningUnitTableObject> runningUnitTableObjects; // list for the table view
     private int trainingDay, trainingWeek; // selected day and week
@@ -105,14 +103,19 @@ public class EntryNodeViewController {
                 }
             };
 
-    public EntryNodeViewController() {}
+    public RunningEntryViewController() {}
 
     public void setSportsLibrary(@NotNull SportsLibrary sportsLibrary) {
         this.sportsLibrary = sportsLibrary;
     }
 
-    public void setRunningPlanEntryNode(RunningPlanEntryNode runningPlanEntryNode) {
-        this.runningPlanEntryNode = runningPlanEntryNode;
+    public RunningPlanEntry getRunningPlanEntry() {
+        return runningPlanEntry;
+    }
+
+    public void setRunningPlanEntry(RunningPlanEntry runningPlanEntry) {
+        this.runningPlanEntry = runningPlanEntry;
+        runningUnits = runningPlanEntry.getRunningUnits();
         showRunningPlanEntryInView();
     }
 
@@ -120,6 +123,8 @@ public class EntryNodeViewController {
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() {
         runningUnits = new ArrayList<>();
+        // list to present running units in table view
+        runningUnitTableObjects = FXCollections.observableArrayList();
         // localisation for texte
         setLabel();
         // fill combo boxes
@@ -154,6 +159,7 @@ public class EntryNodeViewController {
         }
         if (event.getSource().equals(saveButton)) {
             saveRunningPlanEntry();
+            close();
             return;
         }
         if (event.getSource().equals(closeButton)) {
@@ -176,8 +182,8 @@ public class EntryNodeViewController {
         weekComboBoxLabel.setText(applicationResources.getString("entryNodeView.weekLabelText"));
         runningUnitsLabel.setText(applicationResources.getString("entryNodeView.runningUnitsLabelText"));
         addRunningUnitButton.setText(applicationResources.getString("entryNodeView.addRunningUnitButtonText"));
-        saveButton.setText(applicationResources.getString("entryNodeView.saveButtonText"));
-        closeButton.setText(applicationResources.getString("entryNodeView.closeButtonText"));
+        saveButton.setText(applicationResources.getString("action.save"));
+        closeButton.setText(applicationResources.getString("action.cancel"));
     }
 
     private void fillWeekDayComboBox() {
@@ -202,8 +208,6 @@ public class EntryNodeViewController {
     }
 
     private void initializeTableView() {
-        // list to present running units in table view
-        runningUnitTableObjects = FXCollections.observableArrayList();
         // a placeholder, if no running units in entry exists
         runningUnitsTableView.setPlaceholder(
                 new Label(applicationResources.getString("entryNodeView.table.defaultLabelText")));
@@ -237,7 +241,6 @@ public class EntryNodeViewController {
     }
 
     private void showRunningPlanEntryInView() {
-        RunningPlanEntry runningPlanEntry = runningPlanEntryNode.getRunningPlanEntry();
         if (runningPlanEntry != null) {
             // set values for day and week, select the combo boxes
             trainingDay = runningPlanEntry.getDay() ;
@@ -285,6 +288,17 @@ public class EntryNodeViewController {
     }
 
     private void saveRunningPlanEntry() {
+        if (runningPlanEntry != null) {
+            runningPlanEntry.setDay(trainingDay);
+            runningPlanEntry.setWeek(trainingWeek);
+            runningPlanEntry.setRunningUnits(runningUnits);
+        }
+        close();
+    }
 
+    private void close() {
+        // get a handle to the stage
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 }

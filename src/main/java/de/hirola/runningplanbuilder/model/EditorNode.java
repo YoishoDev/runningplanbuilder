@@ -7,7 +7,7 @@ package de.hirola.runningplanbuilder.model;
  * All elements that are to be edited in the editor must isRelated this interface.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public interface EditorNode {
     boolean isRelated();

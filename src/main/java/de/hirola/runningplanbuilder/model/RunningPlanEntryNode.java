@@ -15,7 +15,7 @@ import java.util.UUID;
  * An object of this class presents a running unit in a running plan.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class RunningPlanEntryNode extends Rectangle implements EditorNode {
 

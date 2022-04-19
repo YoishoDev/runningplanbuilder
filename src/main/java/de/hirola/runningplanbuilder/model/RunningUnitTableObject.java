@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * A helper class to view running units in a table view.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class RunningUnitTableObject {
     private final String duration;

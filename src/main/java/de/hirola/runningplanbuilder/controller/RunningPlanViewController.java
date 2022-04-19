@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class RunningPlanViewController {
 
@@ -82,8 +82,8 @@ public class RunningPlanViewController {
         nameTextFieldLabel.setText(applicationResources.getString("templateView.nameLabelText"));
         orderNumberComboBoxLabel.setText(applicationResources.getString("templateView.orderNumberLabelText"));
         remarksTextFieldLabel.setText(applicationResources.getString("templateView.remarksLabelText"));
-        saveButton.setText(applicationResources.getString("templateView.saveButtonText"));
-        closeButton.setText(applicationResources.getString("templateView.closeButtonText"));
+        saveButton.setText(applicationResources.getString("action.save"));
+        closeButton.setText(applicationResources.getString("action.cancel"));
     }
 
     private void fillOrderNumberComboBox() {

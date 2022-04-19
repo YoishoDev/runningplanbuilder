@@ -12,7 +12,7 @@ import javafx.scene.shape.Polyline;
  * running unit nodes over two lines.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class LineBreakConnectionNode extends Polyline implements EditorNode {
 

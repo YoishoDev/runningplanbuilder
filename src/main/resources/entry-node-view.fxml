@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="760.0"
-            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.hirola.runningplanbuilder.controller.EntryNodeViewController">
+            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="de.hirola.runningplanbuilder.controller.RunningEntryViewController">
    <Label fx:id="infoLabel" layoutX="40.0" layoutY="40.0" prefHeight="80.0" prefWidth="700.0" text="Bla Bla Infos" />
    <Label fx:id="weekDayComboBoxLabel" layoutX="40.0" layoutY="140.0" prefHeight="40.0" prefWidth="120.0" text="Laufeinheit am:">
       <font>

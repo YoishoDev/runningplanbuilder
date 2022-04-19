@@ -5,7 +5,7 @@ import de.hirola.runningplanbuilder.model.EditorNode;
 import de.hirola.runningplanbuilder.model.PointNode;
 import de.hirola.runningplanbuilder.model.RunningPlanEntryNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.runningplanbuilder.view.EntryNodeView;
+import de.hirola.runningplanbuilder.view.RunningEntryView;
 import de.hirola.sportslibrary.SportsLibrary;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,7 +35,7 @@ import java.util.Optional;
  * Controller for the editor view.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class EditorViewController {
 
@@ -45,7 +45,7 @@ public class EditorViewController {
 
     private SportsLibrary sportsLibrary;
     private RunningPlanEntryNode runningPlanEntryNode; // selected running unit (node)
-    private EntryNodeView entryNodeView;
+    private RunningEntryView runningEntryView;
     private AnchorPane editorAnchorPane; // editor pane for all elements
     private final List<EditorNode> registeredNodes = new ArrayList<>(); // all nodes
     private ContextMenu nodeContextMenu;
@@ -65,11 +65,14 @@ public class EditorViewController {
                 Object eventSource = event.getSource();
                 if (event.getClickCount() == 2 && eventSource instanceof RunningPlanEntryNode) {
                     runningPlanEntryNode = (RunningPlanEntryNode) eventSource;
-                    if (entryNodeView == null) {
-                        entryNodeView = new EntryNodeView(sportsLibrary);
+                    if (runningEntryView == null) {
+                        runningEntryView = new RunningEntryView(sportsLibrary);
                     }
                     try {
-                        entryNodeView.showView(runningPlanEntryNode);
+                        RunningEntryViewController viewController
+                                = runningEntryView.showView(editorAnchorPane,
+                                runningPlanEntryNode.getRunningPlanEntry());
+                        runningPlanEntryNode.setRunningPlanEntry(viewController.getRunningPlanEntry());
                     } catch (IOException exception) {
                         //TODO: Alert
                         exception.printStackTrace();
@@ -130,11 +133,12 @@ public class EditorViewController {
                     if (event.getSource().equals(nodeContextMenuItemEdit)
                             && ownerNode instanceof RunningPlanEntryNode) {
                         runningPlanEntryNode = (RunningPlanEntryNode) ownerNode;
-                        if (entryNodeView == null) {
-                            entryNodeView = new EntryNodeView(sportsLibrary);
+                        if (runningEntryView == null) {
+                            runningEntryView = new RunningEntryView(sportsLibrary);
                         }
                         try {
-                            entryNodeView.showView(runningPlanEntryNode);
+                            runningEntryView.showView(editorAnchorPane,
+                                    runningPlanEntryNode.getRunningPlanEntry());
                         } catch (IOException exception) {
                             //TODO: Alert
                             exception.printStackTrace();

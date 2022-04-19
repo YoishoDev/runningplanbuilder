@@ -12,7 +12,7 @@ import java.io.File;
  * Global app settings, can be overwritten by user
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public final class Global {
 

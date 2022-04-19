@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * An object of this class presents a start or stop node in the editor pane.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class PointNode extends Circle implements EditorNode {
 

@@ -21,7 +21,7 @@ import java.util.List;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since 0.1
+ * @since v.0.1
  */
 public class RunningUnitViewController {
     private SportsLibrary sportsLibrary;
@@ -93,9 +93,7 @@ public class RunningUnitViewController {
             return;
         }
         if (event.getSource().equals(closeButton)) {
-            // get a handle to the stage
-            Stage stage = (Stage) closeButton.getScene().getWindow();
-            stage.close();
+            close();
             return;
         }
         if (event.getSource().equals(movementTypeComboBox)) {
@@ -109,8 +107,8 @@ public class RunningUnitViewController {
         infoLabel.setText(applicationResources.getString("runningUnitView.infoText"));
         movementTypeComboBoxLabel.setText(applicationResources.getString("runningUnitView.movementTypeLabelText"));
         durationTextFieldLabel.setText(applicationResources.getString("runningUnitView.durationLabelText"));
-        saveButton.setText(applicationResources.getString("runningUnitView.saveButtonText"));
-        closeButton.setText(applicationResources.getString("runningUnitView.closeButtonText"));
+        saveButton.setText(applicationResources.getString("action.save"));
+        closeButton.setText(applicationResources.getString("action.cancel"));
     }
 
     private void fillMovementTypeComboBox() {
@@ -180,7 +178,12 @@ public class RunningUnitViewController {
             runningUnit.setDuration(0);
         }
         runningUnit.setMovementType(movementType);
+        close();
+    }
 
-        //TODO: user preferences, close on save
+    private void close() {
+        // get a handle to the stage
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 }
