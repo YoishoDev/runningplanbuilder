@@ -2,6 +2,7 @@ package de.hirola.runningplanbuilder;
 
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 
@@ -17,6 +18,9 @@ import java.io.File;
 public final class Global {
 
     public static final String PACKAGE_NAME = Global.class.getPackageName();
+
+    public static final FileChooser.ExtensionFilter TEMPLATE_FILE_EXTENSION_FILTER
+            = new FileChooser.ExtensionFilter("JSON Format", "*.json");
 
     public static final boolean NODES_MOVABLE = false;
 

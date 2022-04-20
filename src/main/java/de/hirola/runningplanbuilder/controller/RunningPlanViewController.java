@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -24,7 +25,6 @@ public class RunningPlanViewController {
     private int orderNumber = 1;
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
-    private MainViewController mainViewController;
 
     // created with SceneBuilder
     @FXML
@@ -48,10 +48,13 @@ public class RunningPlanViewController {
 
     public RunningPlanViewController() {}
 
-    public void setMainViewController(@NotNull MainViewController mainViewController) {
-        this.mainViewController = mainViewController;
-        runningPlan = mainViewController.getRunningPlan(); // can be null
-        showRunningPlanInView(); // show the data from template (if not null)
+    @Nullable
+    public RunningPlan getRunningPlan() {
+        return runningPlan;
+    }
+
+    public void setRunningPlan(@Nullable RunningPlan runningPlan) {
+        this.runningPlan = runningPlan;
     }
 
     @FXML
@@ -158,7 +161,6 @@ public class RunningPlanViewController {
            }
         }
         runningPlan.setOrderNumber(orderNumber);
-        mainViewController.setRunningPlan(runningPlan);
         close();
     }
 

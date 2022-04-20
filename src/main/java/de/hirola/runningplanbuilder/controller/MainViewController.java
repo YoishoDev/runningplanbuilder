@@ -8,6 +8,7 @@ import de.hirola.sportslibrary.SportsLibrary;
 import de.hirola.sportslibrary.SportsLibraryException;
 import de.hirola.sportslibrary.model.MovementType;
 import de.hirola.sportslibrary.model.RunningPlan;
+import de.hirola.sportslibrary.util.TemplateLoader;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,6 +22,7 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -127,21 +129,6 @@ public class MainViewController {
 
     public void setHostServices(@NotNull HostServices hostServices) {
         this.hostServices = hostServices;
-    }
-
-    @Nullable
-    public RunningPlan getRunningPlan() {
-        return runningPlan;
-    }
-
-    public void setRunningPlan(@Nullable RunningPlan runningPlan) {
-        this.runningPlan = runningPlan;
-        nodesCanBeAdded = runningPlan != null;
-        if (nodesCanBeAdded) {
-            // enable different menu item
-            menuItemSave.setDisable(false);
-            menuItemEditTemplate.setDisable(false);
-        }
     }
 
     public List<MovementType> getMovementTypes() {
@@ -413,10 +400,17 @@ public class MainViewController {
     private void showTemplateView() {
         // show dialog
         if (runningPlanView == null) {
-            runningPlanView = new RunningPlanView(this, applicationResources);
+            runningPlanView = new RunningPlanView();
         }
         try {
-            runningPlanView.showView();
+            RunningPlanViewController viewController = runningPlanView.showView(editorAnchorPane, runningPlan);
+            runningPlan = viewController.getRunningPlan();
+            nodesCanBeAdded = runningPlan != null;
+            if (nodesCanBeAdded) {
+                // enable different menu item
+                menuItemSave.setDisable(false);
+                menuItemEditTemplate.setDisable(false);
+            }
         } catch (IOException exception) {
             //TODO: Alert
             exception.printStackTrace();
@@ -458,6 +452,36 @@ public class MainViewController {
     }
 
     private void exportToJSONFile() {
-        // export to json
+        // get the export directory with file chooser dialog
+        FileChooser fileChooser = new FileChooser();
+        // set the home as initial directory
+        //TODO: set last used dir
+        String initialDirectoryPathString;
+        try {
+            initialDirectoryPathString = System.getProperty("user.home");
+        } catch (SecurityException exception) {
+            initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
+        }
+        fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
+        fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
+        fileChooser.setInitialFileName(applicationResources.getString("export.file.name"));
+        File jsonFile = fileChooser.showOpenDialog(editorAnchorPane.getScene().getWindow());
+        if (runningPlan != null) {
+            try {
+                TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
+                templateLoader.exportRunningPlanToJSON(runningPlan, jsonFile);
+            } catch (SportsLibraryException exception) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle(applicationResources.getString("app.name")
+                        + " "
+                        + applicationResources.getString("app.version"));
+                alert.setHeaderText(applicationResources.getString("alert.export.failed"));
+                alert.showAndWait();
+                if (sportsLibrary.isDebugMode()) {
+                    sportsLibrary.debug("Export to JSON failed: ", exception);
+                }
+            }
+        }
+
     }
 }

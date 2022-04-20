@@ -56,6 +56,6 @@ public class RunningEntryView {
         stage.setScene(scene);
         stage.showAndWait(); // wait until user closed the dialog
 
-        return runningEntryViewController; // Return the controller back to caller
+        return runningEntryViewController; // return the controller back to caller
     }
 }
