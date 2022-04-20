@@ -1,7 +1,7 @@
 package de.hirola.runningplanbuilder.model;
 
 import de.hirola.runningplanbuilder.Global;
-import de.hirola.sportslibrary.model.RunningPlanEntry;
+import de.hirola.sportsapplications.model.RunningPlanEntry;
 import javafx.scene.shape.Rectangle;
 import org.jetbrains.annotations.Nullable;
 

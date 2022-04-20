@@ -1,9 +1,9 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.SportsLibrary;
-import de.hirola.sportslibrary.model.MovementType;
-import de.hirola.sportslibrary.model.RunningUnit;
+import de.hirola.sportsapplications.SportsLibrary;
+import de.hirola.sportsapplications.model.MovementType;
+import de.hirola.sportsapplications.model.RunningUnit;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

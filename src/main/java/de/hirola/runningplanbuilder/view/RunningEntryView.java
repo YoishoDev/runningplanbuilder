@@ -2,8 +2,8 @@ package de.hirola.runningplanbuilder.view;
 
 import de.hirola.runningplanbuilder.controller.RunningEntryViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.SportsLibrary;
-import de.hirola.sportslibrary.model.RunningPlanEntry;
+import de.hirola.sportsapplications.SportsLibrary;
+import de.hirola.sportsapplications.model.RunningPlanEntry;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;

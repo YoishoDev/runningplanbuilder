@@ -4,11 +4,11 @@ import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.RunningPlanView;
-import de.hirola.sportslibrary.SportsLibrary;
-import de.hirola.sportslibrary.SportsLibraryException;
-import de.hirola.sportslibrary.model.MovementType;
-import de.hirola.sportslibrary.model.RunningPlan;
-import de.hirola.sportslibrary.util.TemplateLoader;
+import de.hirola.sportsapplications.SportsLibrary;
+import de.hirola.sportsapplications.SportsLibraryException;
+import de.hirola.sportsapplications.model.MovementType;
+import de.hirola.sportsapplications.model.RunningPlan;
+import de.hirola.sportsapplications.util.TemplateLoader;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,7 +25,6 @@ import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -452,8 +451,6 @@ public class MainViewController {
     }
 
     private void exportToJSONFile() {
-        // get the export directory with file chooser dialog
-        FileChooser fileChooser = new FileChooser();
         // set the home as initial directory
         //TODO: set last used dir
         String initialDirectoryPathString;
@@ -462,10 +459,12 @@ public class MainViewController {
         } catch (SecurityException exception) {
             initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
         }
+        // get the export directory with file chooser dialog
+        FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
         fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
         fileChooser.setInitialFileName(applicationResources.getString("export.file.name"));
-        File jsonFile = fileChooser.showOpenDialog(editorAnchorPane.getScene().getWindow());
+        File jsonFile = fileChooser.showSaveDialog(editorAnchorPane.getScene().getWindow());
         if (runningPlan != null) {
             try {
                 TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
@@ -478,7 +477,7 @@ public class MainViewController {
                 alert.setHeaderText(applicationResources.getString("alert.export.failed"));
                 alert.showAndWait();
                 if (sportsLibrary.isDebugMode()) {
-                    sportsLibrary.debug("Export to JSON failed: ", exception);
+                    sportsLibrary.debug(exception, "Export to JSON failed.");
                 }
             }
         }

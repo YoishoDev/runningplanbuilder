@@ -6,7 +6,7 @@ import de.hirola.runningplanbuilder.model.PointNode;
 import de.hirola.runningplanbuilder.model.RunningPlanEntryNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.RunningEntryView;
-import de.hirola.sportslibrary.SportsLibrary;
+import de.hirola.sportsapplications.SportsLibrary;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;

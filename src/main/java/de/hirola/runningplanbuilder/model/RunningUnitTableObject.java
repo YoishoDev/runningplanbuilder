@@ -1,7 +1,7 @@
 package de.hirola.runningplanbuilder.model;
 
-import de.hirola.sportslibrary.model.MovementType;
-import de.hirola.sportslibrary.model.RunningUnit;
+import de.hirola.sportsapplications.model.MovementType;
+import de.hirola.sportsapplications.model.RunningUnit;
 import org.jetbrains.annotations.NotNull;
 
 /**

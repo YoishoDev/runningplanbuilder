@@ -3,7 +3,7 @@ module de.hirola.runningplanbuilder {
     requires javafx.fxml;
 
     requires org.jetbrains.annotations;
-    requires sportslibrary;
+    requires sportsapplications;
     requires com.fasterxml.jackson.core;
     requires org.tinylog.api;
 

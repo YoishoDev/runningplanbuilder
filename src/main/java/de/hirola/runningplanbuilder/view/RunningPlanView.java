@@ -4,7 +4,7 @@ import de.hirola.runningplanbuilder.controller.MainViewController;
 import de.hirola.runningplanbuilder.controller.RunningEntryViewController;
 import de.hirola.runningplanbuilder.controller.RunningPlanViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.model.RunningPlan;
+import de.hirola.sportsapplications.model.RunningPlan;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;

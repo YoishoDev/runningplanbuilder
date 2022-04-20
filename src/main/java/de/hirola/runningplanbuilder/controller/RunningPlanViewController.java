@@ -2,7 +2,7 @@ package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportslibrary.model.RunningPlan;
+import de.hirola.sportsapplications.model.RunningPlan;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
