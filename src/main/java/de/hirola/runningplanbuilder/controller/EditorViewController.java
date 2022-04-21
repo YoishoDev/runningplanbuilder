@@ -7,6 +7,7 @@ import de.hirola.runningplanbuilder.model.RunningPlanEntryNode;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.RunningEntryView;
 import de.hirola.sportsapplications.SportsLibrary;
+import de.hirola.sportsapplications.model.RunningPlanEntry;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -257,13 +258,18 @@ public class EditorViewController {
         registeredNodes.remove(node);
     }
 
-    public RunningPlanEntryNode getRunningUnitNode() {
-        return runningPlanEntryNode;
+    public List<RunningPlanEntry> getRunningPlanEntries() {
+        List<RunningPlanEntry> runningPlanEntries = new ArrayList<>();
+        // get the entries from nodes
+        for (EditorNode editorNode: registeredNodes) {
+            if (editorNode instanceof RunningPlanEntryNode) {
+                RunningPlanEntryNode entryNode = (RunningPlanEntryNode) editorNode;
+                runningPlanEntries.add(entryNode.getRunningPlanEntry());
+            }
+        }
+        return runningPlanEntries;
     }
 
-    public void setRunningUnitNode(RunningPlanEntryNode runningPlanEntryNode) {
-        this.runningPlanEntryNode = runningPlanEntryNode;
-    }
     private void createContextMenuForNodes() {
         // creating a context menu
         nodeContextMenu = new ContextMenu();
@@ -320,4 +326,5 @@ public class EditorViewController {
         }
         mainViewController.nodeWasDeleted(editorNode);
     }
+
 }

@@ -22,6 +22,7 @@ public final class Global {
     public static final FileChooser.ExtensionFilter TEMPLATE_FILE_EXTENSION_FILTER
             = new FileChooser.ExtensionFilter("JSON Format", "*.json");
 
+    public static final String TEMPLATE_FILE_EXTENSION = ".json";
     public static final boolean NODES_MOVABLE = false;
 
     // application parameter - can be overwritten by the user

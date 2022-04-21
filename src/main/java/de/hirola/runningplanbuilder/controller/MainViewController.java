@@ -130,10 +130,6 @@ public class MainViewController {
         this.hostServices = hostServices;
     }
 
-    public List<MovementType> getMovementTypes() {
-        return null;
-    }
-
     public void nodeWasDeleted(EditorNode node) {
         addedNodes--;
         // new nodes can be added if the stop node has been deleted
@@ -451,21 +447,28 @@ public class MainViewController {
     }
 
     private void exportToJSONFile() {
-        // set the home as initial directory
-        //TODO: set last used dir
-        String initialDirectoryPathString;
-        try {
-            initialDirectoryPathString = System.getProperty("user.home");
-        } catch (SecurityException exception) {
-            initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
-        }
-        // get the export directory with file chooser dialog
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
-        fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
-        fileChooser.setInitialFileName(applicationResources.getString("export.file.name"));
-        File jsonFile = fileChooser.showSaveDialog(editorAnchorPane.getScene().getWindow());
         if (runningPlan != null) {
+            // get all running entries from editor
+            runningPlan.setEntries(editorViewController.getRunningPlanEntries());
+            // set the home as initial directory
+            //TODO: set last used dir
+            String initialDirectoryPathString;
+            try {
+                initialDirectoryPathString = System.getProperty("user.home");
+            } catch (SecurityException exception) {
+                initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
+            }
+            // get the file name from running plan name
+            String fileName = runningPlan.getName();
+            if (fileName.isEmpty()) {
+                applicationResources.getString("export.file.name");
+            }
+            // get the export directory with file chooser dialog
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
+            fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
+            fileChooser.setInitialFileName(fileName + Global.TEMPLATE_FILE_EXTENSION);
+            File jsonFile = fileChooser.showSaveDialog(editorAnchorPane.getScene().getWindow());
             try {
                 TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
                 templateLoader.exportRunningPlanToJSON(runningPlan, jsonFile);
@@ -481,6 +484,5 @@ public class MainViewController {
                 }
             }
         }
-
     }
 }
