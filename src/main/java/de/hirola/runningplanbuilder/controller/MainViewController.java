@@ -6,28 +6,27 @@ import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.RunningPlanView;
 import de.hirola.sportsapplications.SportsLibrary;
 import de.hirola.sportsapplications.SportsLibraryException;
-import de.hirola.sportsapplications.model.MovementType;
 import de.hirola.sportsapplications.model.RunningPlan;
+import de.hirola.sportsapplications.model.RunningPlanEntry;
 import de.hirola.sportsapplications.util.TemplateLoader;
 import javafx.application.HostServices;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Arc;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,19 +42,13 @@ public class MainViewController {
 
     private SportsLibrary sportsLibrary;
     private RunningPlan runningPlan; // actual template for the application
+    private List<RunningPlanEntry> runningPlanEntries;
+    private ObservableList<RunningPlanEntryTableObject> runningPlanEntryTableObjects; // list for the table view
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private HostServices hostServices;
     private RunningPlanView runningPlanView;
-    private EditorViewController editorViewController; // handler for editor pane
-    private PointNode startNode = null; // there can only be one in editor
-    private PointNode stopNode = null; // there can only be one in editor
-    private EditorNode lastAddedNode = null;
-    private Point2D lastNodePoint = null; // position of last added running unit node
-    private int addedNodes = 0; // count oo added nodes
-    private boolean nodesCanBeAdded = false;
-    private int nodeLineCount = 1; // increase while line break
-    private boolean isNewLine = false;
+
 
     // main app menu
     // created with SceneBuilder
@@ -102,23 +95,17 @@ public class MainViewController {
     @FXML
     private Label runningPlanTemplateNodeLabel;
     @FXML
-    private Rectangle runningUnitNodeMenuElement;
+    private Rectangle runningEntryNodeMenuElement;
     @FXML
-    private Circle stopNodeMenuElement;
-    @FXML
-    private Label runningUnitNodeLabel;
-    @FXML
-    private Label stopNodeMenuElementLabel;
+    private Label runningEntryNodeLabel;
     @FXML
     private Label toolMenuInfoLabel;
-
-    // split pane elements
     @FXML
     private SplitPane mainSplitPane;
     @FXML
-    private AnchorPane toolMenuAnchorPane;
+    private VBox runningPlanEntryTableViewVBox;
     @FXML
-    private AnchorPane editorAnchorPane;
+    private TableView<RunningPlanEntryTableObject> runningPlanEntryTableView;
 
     public MainViewController() {}
 
@@ -130,68 +117,25 @@ public class MainViewController {
         this.hostServices = hostServices;
     }
 
-    public void nodeWasDeleted(EditorNode node) {
-        addedNodes--;
-        // new nodes can be added if the stop node has been deleted
-        if (node instanceof PointNode) {
-            if (!((PointNode) node).isStartNode()) {
-                stopNode = null;
-                nodesCanBeAdded = true;
-            } else {
-                // start point was deleted
-                // reset all values
-                addedNodes = 0;
-                nodeLineCount = 0;
-                startNode = null;
-                lastNodePoint = null;
-            }
-        } else {
-            // set the new node position
-            lastAddedNode = node.getPredecessorNode();
-        }
-    }
-
     @FXML
     // when the FXML loader is done loading the FXML document, it calls this method of the controller
     private void initialize() throws InstantiationException, SportsLibraryException {
+        runningPlanEntries = new ArrayList<>();
+        runningPlanEntryTableObjects = FXCollections.observableArrayList();
         //TODO: get debug mode from preferences
         // initialize sports library
         File appDirectory = SportsLibrary.initializeAppDirectory(Global.PACKAGE_NAME);
         sportsLibrary = SportsLibrary.getInstance(true, appDirectory, null);
-        // initialize the controller for editor pane
-        editorViewController = new EditorViewController(this, editorAnchorPane);
         // set nodes to javax default colors
         runningPlanTemplateNodeMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
-        stopNodeMenuElement.setFill(Global.STOP_CIRCLE_COLOR);
-        runningUnitNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
+        runningEntryNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
         // disable different menu items
         menuItemSave.setDisable(true);
         menuItemEditTemplate.setDisable(true);
-        // localisation the menu (item) labels
-        setMenuLabel();
-        // localisation the tool "menu" item labels
-        setToolMenuLabel();
-    }
-
-    private void setMenuLabel() {
-        menuFile.setText(applicationResources.getString("mainMenuBar.menuFile"));
-        menuItemNew.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemNew"));
-        menuItemOpen.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemOpen"));
-        menuItemSave.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemSave"));
-        menuItemQuit.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemQuit"));
-        menuEdit.setText(applicationResources.getString("mainMenuBar.menuEdit"));
-        menuItemEditTemplate.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemTemplate"));
-        menuItemEditPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
-        menuHelp.setText(applicationResources.getString("mainMenuBar.menuHelp"));
-        menuItemDebug.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemDebug"));
-        menuItemAbout.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemAbout"));
-    }
-
-    private void setToolMenuLabel() {
-        runningPlanTemplateNodeLabel.setText(applicationResources.getString("mainToolMenu.newTemplate"));
-        runningUnitNodeLabel.setText(applicationResources.getString("mainToolMenu.runningUnit"));
-        stopNodeMenuElementLabel.setText(applicationResources.getString("mainToolMenu.stop"));
-        toolMenuInfoLabel.setText(applicationResources.getString("mainToolMenu.info"));
+        setMenuLabel();  // localisation the menu (item) labels
+        setToolMenuLabel(); // localisation the tool "menu" item labels
+        initializeTableView();
+        mainSplitPane.prefHeightProperty().bind(runningPlanEntryTableView.heightProperty());
     }
 
     @FXML
@@ -232,164 +176,52 @@ public class MainViewController {
             // create a new running plan template
             showTemplateView();
         }
-
-        // create a customized rectangle object in editor pane
-        if (event.getSource().equals(runningUnitNodeMenuElement) && nodesCanBeAdded) {
-            // add the start node first
-            if (startNode == null) {
-                // create the start node
-                startNode = new PointNode(true);
-                // set the position in pane
-                Point2D nodePos = getNodePosition();
-                startNode.setCenterX(nodePos.getX());
-                startNode.setCenterY(nodePos.getY());
-                // create a new running node
-                // get the position for the next node
-                nodePos = getNodePosition();
-                RunningPlanEntryNode runningPlanEntryNode = new RunningPlanEntryNode(nodePos.getX(), nodePos.getY());
-                // set the start node as predecessor
-                runningPlanEntryNode.setPredecessorNode(startNode);
-                // set the running unit node as neighbour
-                startNode.setNeighborNode(runningPlanEntryNode);
-                // create the connection between both nodes
-                createNodeConnection(startNode, runningPlanEntryNode);
-                // add both nodes to editor pane
-                editorAnchorPane.getChildren().add(startNode);
-                editorAnchorPane.getChildren().add(runningPlanEntryNode);
-                // remember the last added node
-                lastAddedNode = runningPlanEntryNode;
-                // register both nodes with the editor controller
-                editorViewController.registerNode(startNode);
-                editorViewController.registerNode(runningPlanEntryNode);
-                return;
-            }
-            // add the next running unit node
-            Point2D nodePos = getNodePosition();
-            RunningPlanEntryNode runningPlanEntryNode = new RunningPlanEntryNode(nodePos.getX(), nodePos.getY());
-            // set the previous node as predecessor
-            runningPlanEntryNode.setPredecessorNode(lastAddedNode);
-            // create the connection between both nodes
-            createNodeConnection(lastAddedNode, runningPlanEntryNode);
-            // add the node to editor pane
-            editorAnchorPane.getChildren().add(runningPlanEntryNode);
-            // remember the last added node
-            lastAddedNode = runningPlanEntryNode;
-            // register the node with the editor controller
-            editorViewController.registerNode(runningPlanEntryNode);
-        }
-
-        if (event.getSource().equals(stopNodeMenuElement) && stopNode == null) {
-            // create a stop node
-            stopNode = new PointNode(false);
-            // set the position in pane
-            Point2D nodePos = getNodePosition();
-            stopNode.setCenterX(nodePos.getX());
-            stopNode.setCenterY(nodePos.getY() + Global.RUNNING_UNIT_NODE_HEIGHT / 2);
-            // create the connection between both nodes
-            createNodeConnection(lastAddedNode, stopNode);
-            // add both nodes to editor pane
-            editorAnchorPane.getChildren().add(stopNode);
-            // nodes cannot be added now
-            nodesCanBeAdded = false;
-            // remember the last added node
-            lastAddedNode = stopNode;
-            // register both nodes with the editor controller
-            editorViewController.registerNode(stopNode);
-        }
     }
 
-    private Point2D getNodePosition() {
-        // get the "correct" position in the editor pane
-        Point2D nodePos;
-        if (lastNodePoint == null) {
-            // get the first position from Global depending on size of start node
-            double posX = Global.EDITOR_PANE_NODE_START_POINT.getX();
-            double posY = Global.EDITOR_PANE_NODE_START_POINT.getY()
-                    + Global.RUNNING_UNIT_NODE_HEIGHT / 2;
-            nodePos = new Point2D(posX,posY);
-        } else {
-            // calculate the position of next node
-            if (addedNodes == 1) {
-                // between start node and first running unit node add only the space from Global
-                nodePos = new Point2D(lastNodePoint.getX() + Global.SPACE_BETWEEN_NODES,
-                        Global.EDITOR_PANE_NODE_START_POINT.getY());
-            } else {
-                double posX = lastNodePoint.getX() + Global.RUNNING_UNIT_NODE_WITH + Global.SPACE_BETWEEN_NODES;
-                double posY = lastNodePoint.getY();
-                if (editorAnchorPane.getChildren().size() == 2) {
-                    // correct the y pos from start node
-                    posY = Global.EDITOR_PANE_NODE_START_POINT.getY() - Global.RUNNING_UNIT_NODE_HEIGHT / 2 + Global.CIRCLE_RADIUS / 2
-                            + Global.EDITOR_PANE_NODE_START_POINT.getY();
-                }
-                // at the "end" of editor pane let's do a line break
-                double maxX = editorAnchorPane.getLayoutBounds().getMaxX();
-                if (posX >= maxX - Global.RUNNING_UNIT_NODE_WITH) {
-                    posX = Global.EDITOR_PANE_NODE_START_POINT.getX();
-                    posY = Global.EDITOR_PANE_NODE_START_POINT.getY()
-                            + (nodeLineCount * Global.RUNNING_UNIT_NODE_HEIGHT)
-                            + (nodeLineCount * Global.SPACE_BETWEEN_NODES);
-                    // increase the line count
-                    nodeLineCount++;
-                    // set the flag for new line
-                    isNewLine = true;
-                }
-                nodePos = new Point2D(posX,posY);
-            }
-        }
-        addedNodes++;
-        lastNodePoint = nodePos;
-        return nodePos;
+    private void setMenuLabel() {
+        menuFile.setText(applicationResources.getString("mainMenuBar.menuFile"));
+        menuItemNew.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemNew"));
+        menuItemOpen.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemOpen"));
+        menuItemSave.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemSave"));
+        menuItemQuit.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemQuit"));
+        menuEdit.setText(applicationResources.getString("mainMenuBar.menuEdit"));
+        menuItemEditTemplate.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemTemplate"));
+        menuItemEditPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
+        menuHelp.setText(applicationResources.getString("mainMenuBar.menuHelp"));
+        menuItemDebug.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemDebug"));
+        menuItemAbout.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemAbout"));
     }
 
-    private void createNodeConnection(EditorNode firstNode, EditorNode secondNode) {
-        // get the center of both nodes
-        Bounds firstNodeBounds = ((Shape) firstNode).getBoundsInLocal();
-        Bounds secondNodeBounds = ((Shape) secondNode).getBoundsInLocal();
-        Point2D startPoint;
-        if (firstNode instanceof PointNode) {
-            // setting the starting point to the right of the center of the circle
-            startPoint = new Point2D(firstNodeBounds.getCenterX() + (Global.CIRCLE_RADIUS / 2),
-                    firstNodeBounds.getCenterY());
-        } else {
-            // setting the start point of line at middle of the right edge of the first node
-            startPoint = new Point2D(firstNodeBounds.getCenterX() + (Global.RUNNING_UNIT_NODE_WITH / 2),
-                    firstNodeBounds.getCenterY());
-        }
-        if (isNewLine) {
-            // draw the connection to the new line
-            Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.RUNNING_UNIT_NODE_WITH / 2),
-                    secondNodeBounds.getCenterY());
-            LineBreakConnectionNode connectionNode = new LineBreakConnectionNode(firstNode, secondNode, startPoint, endPoint);
-            // add all nodes to editor pane
-            editorAnchorPane.getChildren().add(connectionNode);
-            // register all nodes with the editor controller
-            editorViewController.registerNode(connectionNode);
-            // reset the flag
-            isNewLine = false;
-        } else {
-            if (secondNode instanceof PointNode) {
-                // setting the end point of line at middle of the left edge of the second node
-                Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.CIRCLE_RADIUS / 2),
-                        firstNodeBounds.getCenterY());
-                SimpleLineConnectionNode simpleLineConnectionNode = new SimpleLineConnectionNode(firstNode, secondNode, startPoint, endPoint);
-                // add the node to editor pane
-                editorAnchorPane.getChildren().add(simpleLineConnectionNode);
-                // register the node with the editor controller
-                editorViewController.registerNode(simpleLineConnectionNode);
-            } else {
-                // setting the end point of line at middle of the left edge of the second node
-                Point2D endPoint = new Point2D(secondNodeBounds.getCenterX() - (Global.RUNNING_UNIT_NODE_WITH / 2),
-                        firstNodeBounds.getCenterY());
-                SimpleLineConnectionNode simpleLineConnectionNode = new SimpleLineConnectionNode(firstNode, secondNode, startPoint, endPoint);
-                // add the node to editor pane
-                editorAnchorPane.getChildren().add(simpleLineConnectionNode);
-                // register the node with the editor controller
-                editorViewController.registerNode(simpleLineConnectionNode);
-            }
-        }
-        // save connection info in nodes
-        secondNode.setPredecessorNode(firstNode);
-        firstNode.setSuccessorNode(secondNode);
+    private void setToolMenuLabel() {
+        runningPlanTemplateNodeLabel.setText(applicationResources.getString("mainToolMenu.newTemplate"));
+        runningEntryNodeLabel.setText(applicationResources.getString("mainToolMenu.runningUnit"));
+        toolMenuInfoLabel.setText(applicationResources.getString("mainToolMenu.info"));
+    }
+
+    private void initializeTableView() {
+        // a placeholder, if no running entries in plan exists
+        runningPlanEntryTableView.setPlaceholder(
+                new Label(applicationResources.getString("mainView.table.defaultLabelText")));
+        runningPlanEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        // TODO: in this version only a single row can be selected
+        runningPlanEntryTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        // the table column header
+        TableColumn<RunningPlanEntryTableObject, String> dayColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.1.headerText"));
+        dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
+        TableColumn<RunningPlanEntryTableObject, String> weekColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.2.headerText"));
+        weekColumn.setCellValueFactory(new PropertyValueFactory<>("weekString"));
+        TableColumn<RunningPlanEntryTableObject, String> durationColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.3.headerText"));
+        durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationString"));
+        TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.4.headerText"));
+        runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
+        runningPlanEntryTableView.getColumns().add(dayColumn);
+        runningPlanEntryTableView.getColumns().add(weekColumn);
+        runningPlanEntryTableView.getColumns().add(durationColumn);
+        runningPlanEntryTableView.getColumns().add(runningUnitsColumn);
     }
 
     private void showTemplateView() {
@@ -398,10 +230,9 @@ public class MainViewController {
             runningPlanView = new RunningPlanView();
         }
         try {
-            RunningPlanViewController viewController = runningPlanView.showView(editorAnchorPane, runningPlan);
+            RunningPlanViewController viewController = runningPlanView.showView(mainSplitPane, runningPlan);
             runningPlan = viewController.getRunningPlan();
-            nodesCanBeAdded = runningPlan != null;
-            if (nodesCanBeAdded) {
+            if (runningPlan != null) {
                 // enable different menu item
                 menuItemSave.setDisable(false);
                 menuItemEditTemplate.setDisable(false);
@@ -449,7 +280,7 @@ public class MainViewController {
     private void exportToJSONFile() {
         if (runningPlan != null) {
             // get all running entries from editor
-            runningPlan.setEntries(editorViewController.getRunningPlanEntries());
+            //runningPlan.setEntries(editorViewController.getRunningPlanEntries());
             // set the home as initial directory
             //TODO: set last used dir
             String initialDirectoryPathString;
@@ -468,7 +299,7 @@ public class MainViewController {
             fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
             fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
             fileChooser.setInitialFileName(fileName + Global.TEMPLATE_FILE_EXTENSION);
-            File jsonFile = fileChooser.showSaveDialog(editorAnchorPane.getScene().getWindow());
+            File jsonFile = fileChooser.showSaveDialog(mainSplitPane.getScene().getWindow());
             try {
                 TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
                 templateLoader.exportRunningPlanToJSON(runningPlan, jsonFile);
