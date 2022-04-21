@@ -36,7 +36,7 @@ public class RunningEntryView {
         applicationResources = ApplicationResources.getInstance();
     }
 
-    public RunningEntryViewController showView(Node parent, @NotNull RunningPlanEntry runningPlanEntry) throws IOException {
+    public RunningEntryViewController showViewModal(Node parent, @NotNull RunningPlanEntry runningPlanEntry) throws IOException {
         URL fxmlURL = getClass()
                 .getClassLoader()
                 .getResource("entry-node-view.fxml");

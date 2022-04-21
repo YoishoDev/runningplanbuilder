@@ -67,15 +67,15 @@
     </MenuBar>
     <SplitPane fx:id="mainSplitPane" dividerPositions="0.5" prefHeight="600.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
         <AnchorPane maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
-            <Rectangle fx:id="runningEntryNodeMenuElement" arcHeight="5.0" arcWidth="5.0" fill="#f0ff1f" height="30.0" layoutX="61.0" layoutY="113.0" onMouseClicked="#onMouseClicked" stroke="BLACK" strokeType="INSIDE" width="80.0" />
+            <Rectangle fx:id="runningEntryMenuElement" arcHeight="5.0" arcWidth="5.0" fill="#f0ff1f" height="30.0" layoutX="61.0" layoutY="113.0" onMouseClicked="#onMouseClicked" stroke="BLACK" strokeType="INSIDE" width="80.0" />
             <Label fx:id="runningEntryNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="151.0" prefHeight="18.0" prefWidth="170.0" text="Running entry" textAlignment="CENTER" />
             <Label fx:id="toolMenuInfoLabel" alignment="TOP_LEFT" layoutX="10.0" layoutY="301.0" prefHeight="279.0" prefWidth="170.0" text="Label" textOverrun="WORD_ELLIPSIS" wrapText="true" />
-         <Arc fx:id="runningPlanTemplateNodeMenuElement" fill="DODGERBLUE" layoutX="109.0" layoutY="50.0" length="270.0" onMouseClicked="#onMouseClicked" radiusX="47.0" radiusY="15.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+         <Arc fx:id="runningPlanMenuElement" fill="DODGERBLUE" layoutX="109.0" layoutY="50.0" length="270.0" onMouseClicked="#onMouseClicked" radiusX="47.0" radiusY="15.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
          <Label fx:id="runningPlanTemplateNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="75.0" prefHeight="18.0" prefWidth="170.0" text="New Running plan" textAlignment="CENTER" />
         </AnchorPane>
         <ScrollPane fitToWidth="true">
             <AnchorPane minHeight="600.0" minWidth="400.0">
-                <TableView fx:id="runningPlanEntryTableView" editable="true" layoutX="206.0" layoutY="137.0"
+                <TableView fx:id="runningPlanEntryTableView" layoutX="206.0" layoutY="137.0"
                            prefHeight="800.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0"
                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columnResizePolicy>

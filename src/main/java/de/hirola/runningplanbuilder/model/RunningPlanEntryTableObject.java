@@ -1,5 +1,6 @@
 package de.hirola.runningplanbuilder.model;
 
+import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.sportsapplications.model.MovementType;
 import de.hirola.sportsapplications.model.RunningPlanEntry;
 import de.hirola.sportsapplications.model.RunningUnit;
@@ -17,7 +18,7 @@ import java.util.List;
  * @since v.0.1
  */
 public class RunningPlanEntryTableObject {
-
+    private final ApplicationResources applicationResources;
     private final String dayString;
     private final String weekString;
     private final String durationString;
@@ -25,9 +26,10 @@ public class RunningPlanEntryTableObject {
 
 
     public RunningPlanEntryTableObject(@NotNull RunningPlanEntry runningPlanEntry) {
-        dayString = String.valueOf(runningPlanEntry.getDay());
+        applicationResources = ApplicationResources.getInstance();
+        dayString = getWeekDayString(runningPlanEntry.getDay());
         weekString = String.valueOf(runningPlanEntry.getWeek());
-        durationString = String.valueOf(runningPlanEntry.getDuration());
+        durationString = String.valueOf(runningPlanEntry.getDuration()) + " min";
         runningUnitsString = buildRunningUnitsString(runningPlanEntry.getRunningUnits());
     }
 
@@ -47,10 +49,24 @@ public class RunningPlanEntryTableObject {
         return runningUnitsString;
     }
 
+    public String getWeekDayString(int forDay) {
+        String weekDayString = "";
+        switch (forDay) {
+            case 1: return applicationResources.getString("monday");
+            case 2: return applicationResources.getString("tuesday");
+            case 3: return applicationResources.getString("wednesday");
+            case 4: return applicationResources.getString("thursday");
+            case 5: return applicationResources.getString("friday");
+            case 6: return applicationResources.getString("saturday");
+            case 7: return applicationResources.getString("sunday");
+        }
+        return weekDayString;
+    }
     private String buildRunningUnitsString(List<RunningUnit> runningUnits) {
         StringBuilder runningUnitsString = new StringBuilder();
         int count = 0;
         for (RunningUnit runningUnit: runningUnits) {
+            count++;
             MovementType movementType = runningUnit.getMovementType();
             runningUnitsString
                     .append(runningUnit.getDuration())
@@ -59,7 +75,6 @@ public class RunningPlanEntryTableObject {
             if (count < runningUnits.size()) {
                 runningUnitsString.append(", ");
             }
-            count++;
         }
         return runningUnitsString.toString();
     }

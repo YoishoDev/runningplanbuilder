@@ -3,16 +3,19 @@ package de.hirola.runningplanbuilder.controller;
 import de.hirola.runningplanbuilder.Global;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.runningplanbuilder.view.RunningEntryView;
 import de.hirola.runningplanbuilder.view.RunningPlanView;
 import de.hirola.sportsapplications.SportsLibrary;
 import de.hirola.sportsapplications.SportsLibraryException;
 import de.hirola.sportsapplications.model.RunningPlan;
 import de.hirola.sportsapplications.model.RunningPlanEntry;
+import de.hirola.sportsapplications.util.RunningPlanTemplate;
 import de.hirola.sportsapplications.util.TemplateLoader;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -41,13 +44,18 @@ import java.util.List;
 public class MainViewController {
 
     private SportsLibrary sportsLibrary;
-    private RunningPlan runningPlan; // actual template for the application
+    private RunningPlan runningPlan; // actual running plan for the application
     private List<RunningPlanEntry> runningPlanEntries;
+    private RunningPlanEntry runningPlanEntry; // actual edited running plan entry
     private ObservableList<RunningPlanEntryTableObject> runningPlanEntryTableObjects; // list for the table view
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private HostServices hostServices;
     private RunningPlanView runningPlanView;
+    private RunningEntryView runningEntryView;
+    private ContextMenu tableViewContextMenu;
+    private MenuItem tableViewContextMenuItemEdit;
+    private MenuItem tableViewContextMenuItemDelete;
 
 
     // main app menu
@@ -91,11 +99,11 @@ public class MainViewController {
 
     // tool "menu"
     @FXML
-    private Arc runningPlanTemplateNodeMenuElement;
+    private Arc runningPlanMenuElement;
     @FXML
     private Label runningPlanTemplateNodeLabel;
     @FXML
-    private Rectangle runningEntryNodeMenuElement;
+    private Rectangle runningEntryMenuElement;
     @FXML
     private Label runningEntryNodeLabel;
     @FXML
@@ -103,15 +111,31 @@ public class MainViewController {
     @FXML
     private SplitPane mainSplitPane;
     @FXML
-    private VBox runningPlanEntryTableViewVBox;
-    @FXML
     private TableView<RunningPlanEntryTableObject> runningPlanEntryTableView;
 
-    public MainViewController() {}
+    final EventHandler<ActionEvent> onMenuItemActionEventHandler =
+            event -> {
+                if (event.getSource() instanceof MenuItem) {
+                    // context menu action from table view
+                    if (event.getSource().equals(tableViewContextMenuItemEdit)) {
+                        // open the view for editing
+                        int index = runningPlanEntryTableView.getSelectionModel().getSelectedIndex();
+                        if (index < runningPlanEntries.size()) {
+                            runningPlanEntry = runningPlanEntries.get(index);
+                            showRunningEntryView();
+                        }
+                    }
+                    // context menu action from a running unit element
+                    if (event.getSource().equals(tableViewContextMenuItemDelete)) {
+                        //TODO: ask user
+                        // remove the selected running unit
+                        int index = runningPlanEntryTableView.getSelectionModel().getSelectedIndex();
+                        removeRunningEntryForIndex(index);
+                    }
+                }
+            };
 
-    public SportsLibrary getSportsLibrary() {
-        return sportsLibrary;
-    }
+    public MainViewController() {}
 
     public void setHostServices(@NotNull HostServices hostServices) {
         this.hostServices = hostServices;
@@ -127,15 +151,15 @@ public class MainViewController {
         File appDirectory = SportsLibrary.initializeAppDirectory(Global.PACKAGE_NAME);
         sportsLibrary = SportsLibrary.getInstance(true, appDirectory, null);
         // set nodes to javax default colors
-        runningPlanTemplateNodeMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
-        runningEntryNodeMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
+        runningPlanMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
+        runningEntryMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
         // disable different menu items
         menuItemSave.setDisable(true);
         menuItemEditTemplate.setDisable(true);
         setMenuLabel();  // localisation the menu (item) labels
         setToolMenuLabel(); // localisation the tool "menu" item labels
         initializeTableView();
-        mainSplitPane.prefHeightProperty().bind(runningPlanEntryTableView.heightProperty());
+        createContextMenuForTableView();
     }
 
     @FXML
@@ -171,10 +195,24 @@ public class MainViewController {
     @FXML
     // use for onMouseClicked by the FXML loader
     private void onMouseClicked(MouseEvent event) {
-
-        if (event.getSource().equals(runningPlanTemplateNodeMenuElement)) {
-            // create a new running plan template
+        if (event.getSource().equals(runningPlanMenuElement)) {
+            // create a new running plan
             showTemplateView();
+            return;
+        }
+        if (event.getSource().equals(runningEntryMenuElement)) {
+            if (runningPlan != null) {
+                // create a new running entry
+                runningPlanEntry = null;
+                showRunningEntryView();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle(applicationResources.getString("app.name")
+                        + " "
+                        + applicationResources.getString("app.version"));
+                alert.setHeaderText(applicationResources.getString("alert.runningplan.null"));
+                alert.showAndWait();
+            }
         }
     }
 
@@ -202,26 +240,41 @@ public class MainViewController {
         // a placeholder, if no running entries in plan exists
         runningPlanEntryTableView.setPlaceholder(
                 new Label(applicationResources.getString("mainView.table.defaultLabelText")));
-        runningPlanEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        runningPlanEntryTableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         // TODO: in this version only a single row can be selected
         runningPlanEntryTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         // the table column header
-        TableColumn<RunningPlanEntryTableObject, String> dayColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.1.headerText"));
-        dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
         TableColumn<RunningPlanEntryTableObject, String> weekColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.2.headerText"));
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.1.headerText"));
         weekColumn.setCellValueFactory(new PropertyValueFactory<>("weekString"));
+        weekColumn.setPrefWidth(Global.WEEK_COLUMN_PREF_WIDTH);
+        TableColumn<RunningPlanEntryTableObject, String> dayColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.2.headerText"));
+        dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
+        dayColumn.setPrefWidth(Global.DAY_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> durationColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.3.headerText"));
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationString"));
+        durationColumn.setPrefWidth(Global.DURATION_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.4.headerText"));
         runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
-        runningPlanEntryTableView.getColumns().add(dayColumn);
+        runningUnitsColumn.setPrefWidth(Global.RUNNING_UNIT_COLUMN_PREF_WIDTH);
         runningPlanEntryTableView.getColumns().add(weekColumn);
+        runningPlanEntryTableView.getColumns().add(dayColumn);
         runningPlanEntryTableView.getColumns().add(durationColumn);
         runningPlanEntryTableView.getColumns().add(runningUnitsColumn);
+    }
+
+    private void createContextMenuForTableView() {
+        // creating a context menu
+        tableViewContextMenu = new ContextMenu();
+        // creating the menu Items for the context menu
+        tableViewContextMenuItemEdit = new MenuItem(applicationResources.getString("action.edit"));
+        tableViewContextMenuItemEdit.setOnAction(onMenuItemActionEventHandler);
+        tableViewContextMenuItemDelete = new MenuItem(applicationResources.getString("action.delete"));
+        tableViewContextMenuItemDelete.setOnAction(onMenuItemActionEventHandler);
+        tableViewContextMenu.getItems().addAll(tableViewContextMenuItemEdit, tableViewContextMenuItemDelete);
     }
 
     private void showTemplateView() {
@@ -239,6 +292,28 @@ public class MainViewController {
             }
         } catch (IOException exception) {
             //TODO: Alert
+            exception.printStackTrace();
+        }
+    }
+
+    private void showRunningEntryView() {
+        // show dialog
+        if (runningPlanEntry == null) {
+            runningPlanEntry = new RunningPlanEntry();
+        }
+        try {
+            // get the running plan entry from modal dialog
+            if (runningEntryView == null) {
+                runningEntryView = new RunningEntryView(sportsLibrary);
+            }
+            RunningEntryViewController viewController
+                    = runningEntryView.showViewModal(mainSplitPane, runningPlanEntry);
+            runningPlanEntry = viewController.getRunningPlanEntry();
+            if (runningPlanEntry != null) {
+                addRunningPlanEntry(runningPlanEntry);
+            }
+        } catch (IOException exception) {
+            //TODO: alert
             exception.printStackTrace();
         }
     }
@@ -273,8 +348,86 @@ public class MainViewController {
         alert.showAndWait();
     }
 
+    private void addRunningPlanEntry(RunningPlanEntry entry) {
+        // if the running entry is new, add it to the list
+        if (!runningPlanEntries.contains(entry)) {
+            // add to the running entry list of running plan
+            runningPlanEntries.add(entry);
+            // add to table object list
+            runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
+        }
+        // add context menu to table view
+        if (runningPlanEntryTableObjects.size() == 1) {
+            runningPlanEntryTableView.setContextMenu(tableViewContextMenu);
+        }
+        // refresh the table view
+        runningPlanEntryTableView.getItems().clear();
+        runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+    }
+
+    private void removeRunningEntryForIndex(int index) {
+        if (index < runningPlanEntries.size()) {
+            // remove the entry from both lists
+            runningPlanEntries.remove(index);
+            runningPlanEntryTableObjects.remove(index);
+            // refresh the table view
+            runningPlanEntryTableView.getItems().clear();
+            runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+        }
+        if (runningPlanEntryTableObjects.size() == 0) {
+            runningPlanEntryTableView.setContextMenu(null);
+        }
+    }
+
     private void importJSONFromFile() {
         // open system file dialog
+        //TODO: set last used dir
+        String initialDirectoryPathString;
+        try {
+            initialDirectoryPathString = System.getProperty("user.home");
+        } catch (SecurityException exception) {
+            initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
+        fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
+        File jsonFile = fileChooser.showOpenDialog(mainSplitPane.getScene().getWindow());
+        if (!jsonFile.exists() || jsonFile.isDirectory() || !jsonFile.canRead()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(applicationResources.getString("app.name")
+                    + " "
+                    + applicationResources.getString("app.version"));
+            alert.setHeaderText(applicationResources.getString("alert.import.failed"));
+            alert.setContentText(applicationResources.getString("alert.import.wrong.file.info"));
+            alert.showAndWait();
+            return;
+        }
+        try {
+            // load the plan from json
+            TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
+            runningPlan = templateLoader.loadRunningPlanFromJSON(jsonFile);
+            runningPlanEntries = runningPlan.getEntries();
+            // update the table object list
+            runningPlanEntryTableObjects.clear();
+            for (RunningPlanEntry entry: runningPlanEntries) {
+                runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
+            }
+            // refresh the table view
+            runningPlanEntryTableView.getItems().clear();
+            runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+            // enable saving the running plan
+            menuItemSave.setDisable(false);
+        } catch (Exception exception) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(applicationResources.getString("app.name")
+                    + " "
+                    + applicationResources.getString("app.version"));
+            alert.setHeaderText(applicationResources.getString("alert.import.failed"));
+            alert.showAndWait();
+            if (sportsLibrary.isDebugMode()) {
+                sportsLibrary.debug(exception, "Import from JSON failed.");
+            }
+        }
     }
 
     private void exportToJSONFile() {

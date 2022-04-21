@@ -265,7 +265,7 @@ public class RunningEntryViewController {
     }
 
     private void addRunningUnit(RunningUnit runningUnit) {
-        // if the running unit is new,a dd it to the list
+        // if the running unit is new, add it to the list
         if (!runningUnits.contains(runningUnit)) {
             // add to the running unit list of entry
             runningUnits.add(runningUnit);
