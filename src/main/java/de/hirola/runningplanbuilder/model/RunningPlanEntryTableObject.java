@@ -4,9 +4,11 @@ import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.sportsapplications.model.MovementType;
 import de.hirola.sportsapplications.model.RunningPlanEntry;
 import de.hirola.sportsapplications.model.RunningUnit;
+import de.hirola.sportsapplications.model.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -19,18 +21,20 @@ import java.util.List;
  */
 public class RunningPlanEntryTableObject {
     private final ApplicationResources applicationResources;
-    private final String dayString;
-    private final String weekString;
-    private final String durationString;
-    private final String runningUnitsString;
+    private final UUID uuid;
+    private String dayString;
+    private String weekString;
+    private String durationString;
+    private String runningUnitsString;
 
 
-    public RunningPlanEntryTableObject(@NotNull RunningPlanEntry runningPlanEntry) {
+    public RunningPlanEntryTableObject(@NotNull RunningPlanEntry entry) {
+        uuid = entry.getUUID();
         applicationResources = ApplicationResources.getInstance();
-        dayString = getWeekDayString(runningPlanEntry.getDay());
-        weekString = String.valueOf(runningPlanEntry.getWeek());
-        durationString = String.valueOf(runningPlanEntry.getDuration()) + " min";
-        runningUnitsString = buildRunningUnitsString(runningPlanEntry.getRunningUnits());
+        dayString = getWeekDayString(entry.getDay());
+        weekString = String.valueOf(entry.getWeek());
+        durationString = entry.getDuration() + " min";
+        runningUnitsString = buildRunningUnitsString(entry.getRunningUnits());
     }
 
     public String getDayString() {
@@ -62,6 +66,16 @@ public class RunningPlanEntryTableObject {
         }
         return weekDayString;
     }
+
+    public void update(@NotNull RunningPlanEntry entry) {
+        if (entry.getUUID().equals(uuid)) {
+            dayString = getWeekDayString(entry.getDay());
+            weekString = String.valueOf(entry.getWeek());
+            durationString = entry.getDuration() + " min";
+            runningUnitsString = buildRunningUnitsString(entry.getRunningUnits());
+        }
+    }
+
     private String buildRunningUnitsString(List<RunningUnit> runningUnits) {
         StringBuilder runningUnitsString = new StringBuilder();
         int count = 0;
@@ -77,5 +91,18 @@ public class RunningPlanEntryTableObject {
             }
         }
         return runningUnitsString.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RunningPlanEntryTableObject that = (RunningPlanEntryTableObject) o;
+        return uuid.equals(that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
     }
 }

@@ -9,7 +9,6 @@ import de.hirola.sportsapplications.SportsLibrary;
 import de.hirola.sportsapplications.SportsLibraryException;
 import de.hirola.sportsapplications.model.RunningPlan;
 import de.hirola.sportsapplications.model.RunningPlanEntry;
-import de.hirola.sportsapplications.util.RunningPlanTemplate;
 import de.hirola.sportsapplications.util.TemplateLoader;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
@@ -83,7 +82,7 @@ public class MainViewController {
     private Menu menuEdit; // edit menu
     @FXML
     // the reference will be injected by the FXML loader
-    private MenuItem menuItemEditTemplate;
+    private MenuItem menuItemEditRunningPlan;
     @FXML
     // the reference will be injected by the FXML loader
     private MenuItem menuItemEditPreferences;
@@ -155,7 +154,7 @@ public class MainViewController {
         runningEntryMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
         // disable different menu items
         menuItemSave.setDisable(true);
-        menuItemEditTemplate.setDisable(true);
+        menuItemEditRunningPlan.setDisable(true);
         setMenuLabel();  // localisation the menu (item) labels
         setToolMenuLabel(); // localisation the tool "menu" item labels
         initializeTableView();
@@ -166,8 +165,13 @@ public class MainViewController {
     // use for onAction by the FXML loader
     private void onAction(ActionEvent event) {
         if (event.getSource().equals(menuItemNew)) {
-            //TODO unsaved values - ask user
-            showTemplateView();
+            if (runningPlan != null) {
+                resetRunningPlan();
+            }
+            if (runningPlan == null) {
+                // running plan was reset
+                showRunningPlanView();
+            }
         }
         if (event.getSource().equals(menuItemOpen)) {
             //TODO unsaved values - ask user
@@ -181,8 +185,8 @@ public class MainViewController {
             Stage stage = (Stage) mainSplitPane.getScene().getWindow();
             stage.close();
         }
-        if (event.getSource().equals(menuItemEditTemplate)) {
-            showTemplateView();
+        if (event.getSource().equals(menuItemEditRunningPlan)) {
+            showRunningPlanView();
         }
         if (event.getSource().equals(menuItemDebug)) {
             showDebugDialog();
@@ -197,7 +201,7 @@ public class MainViewController {
     private void onMouseClicked(MouseEvent event) {
         if (event.getSource().equals(runningPlanMenuElement)) {
             // create a new running plan
-            showTemplateView();
+            showRunningPlanView();
             return;
         }
         if (event.getSource().equals(runningEntryMenuElement)) {
@@ -223,7 +227,7 @@ public class MainViewController {
         menuItemSave.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemSave"));
         menuItemQuit.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemQuit"));
         menuEdit.setText(applicationResources.getString("mainMenuBar.menuEdit"));
-        menuItemEditTemplate.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemTemplate"));
+        menuItemEditRunningPlan.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemTemplate"));
         menuItemEditPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
         menuHelp.setText(applicationResources.getString("mainMenuBar.menuHelp"));
         menuItemDebug.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemDebug"));
@@ -277,7 +281,7 @@ public class MainViewController {
         tableViewContextMenu.getItems().addAll(tableViewContextMenuItemEdit, tableViewContextMenuItemDelete);
     }
 
-    private void showTemplateView() {
+    private void showRunningPlanView() {
         // show dialog
         if (runningPlanView == null) {
             runningPlanView = new RunningPlanView();
@@ -288,7 +292,7 @@ public class MainViewController {
             if (runningPlan != null) {
                 // enable different menu item
                 menuItemSave.setDisable(false);
-                menuItemEditTemplate.setDisable(false);
+                menuItemEditRunningPlan.setDisable(false);
             }
         } catch (IOException exception) {
             //TODO: Alert
@@ -312,6 +316,9 @@ public class MainViewController {
             if (runningPlanEntry != null) {
                 addRunningPlanEntry(runningPlanEntry);
             }
+            // refresh the table view
+            runningPlanEntryTableView.getItems().clear();
+            runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
         } catch (IOException exception) {
             //TODO: alert
             exception.printStackTrace();
@@ -348,13 +355,16 @@ public class MainViewController {
         alert.showAndWait();
     }
 
-    private void addRunningPlanEntry(RunningPlanEntry entry) {
+    private void addRunningPlanEntry(@NotNull RunningPlanEntry entry) {
         // if the running entry is new, add it to the list
         if (!runningPlanEntries.contains(entry)) {
             // add to the running entry list of running plan
             runningPlanEntries.add(entry);
             // add to table object list
             runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
+        } else {
+            // the entry can be updated - update the table object
+
         }
         // add context menu to table view
         if (runningPlanEntryTableObjects.size() == 1) {
@@ -415,7 +425,8 @@ public class MainViewController {
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
-            // enable saving the running plan
+            // enable editing and saving the running plan
+            menuItemEditRunningPlan.setDisable(false);
             menuItemSave.setDisable(false);
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -442,8 +453,8 @@ public class MainViewController {
             } catch (SecurityException exception) {
                 initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
             }
-            // get the file name from running plan name
-            String fileName = runningPlan.getName();
+            // get the file name from running plan name, removing empty spaces
+            String fileName = runningPlan.getName().replaceAll("\\s","");
             if (fileName.isEmpty()) {
                 applicationResources.getString("export.file.name");
             }
@@ -468,5 +479,30 @@ public class MainViewController {
                 }
             }
         }
+    }
+
+    // clean all data
+    private void resetRunningPlan() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("alert.runningplan.overwrite"));
+        ButtonType okButton = new ButtonType(applicationResources
+                .getString("action.yes"), ButtonBar.ButtonData.YES);
+        ButtonType cancelButton = new ButtonType(applicationResources
+                .getString("action.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(okButton, cancelButton);
+        alert.showAndWait().ifPresent(type -> {
+            if (type == okButton) {
+                runningPlan = null;
+                runningPlanEntry = null;
+                runningPlanEntries.clear();
+                runningPlanEntryTableObjects.clear();
+                runningPlanEntryTableView.getItems().clear();
+            } else {
+                alert.close();
+            }
+        });
     }
 }

@@ -57,7 +57,7 @@
             <MenuItem fx:id="menuItemQuit" mnemonicParsing="false" onAction="#onAction" text="Quit" />
         </Menu>
         <Menu fx:id="menuEdit" mnemonicParsing="false" text="Edit">
-            <MenuItem fx:id="menuItemEditTemplate" mnemonicParsing="false" onAction="#onAction" text="Edit Template" />
+            <MenuItem fx:id="menuItemEditRunningPlan" mnemonicParsing="false" onAction="#onAction" text="Edit Template" />
             <MenuItem fx:id="menuItemEditPreferences" mnemonicParsing="false" onAction="#onAction" text="Preferences" />
         </Menu>
         <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">

@@ -1,7 +1,5 @@
 package de.hirola.runningplanbuilder.view;
 
-import de.hirola.runningplanbuilder.controller.MainViewController;
-import de.hirola.runningplanbuilder.controller.RunningEntryViewController;
 import de.hirola.runningplanbuilder.controller.RunningPlanViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.sportsapplications.model.RunningPlan;
@@ -10,7 +8,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

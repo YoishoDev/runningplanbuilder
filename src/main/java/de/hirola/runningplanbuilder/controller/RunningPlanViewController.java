@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -55,6 +54,7 @@ public class RunningPlanViewController {
 
     public void setRunningPlan(@Nullable RunningPlan runningPlan) {
         this.runningPlan = runningPlan;
+        showRunningPlanInView();
     }
 
     @FXML
@@ -62,7 +62,6 @@ public class RunningPlanViewController {
     private void initialize() {
         setLabel();
         fillOrderNumberComboBox();
-        showRunningPlanInView(); // if unit not null, given from node
     }
 
     @FXML
@@ -145,12 +144,12 @@ public class RunningPlanViewController {
                        + applicationResources.getString("app.version"));
                alert.setHeaderText(applicationResources.getString("alert.template.clearRemarks"));
                ButtonType okButton = new ButtonType(applicationResources
-                       .getString("action.ok"), ButtonBar.ButtonData.YES);
+                       .getString("action.yes"), ButtonBar.ButtonData.YES);
                ButtonType cancelButton = new ButtonType(applicationResources
                        .getString("action.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
                alert.getButtonTypes().setAll(okButton, cancelButton);
                alert.showAndWait().ifPresent(type -> {
-                   if (type == ButtonType.OK) {
+                   if (type == okButton) {
                        runningPlan.setRemarks(remarksTextArea.getText());
                    } else {
                        alert.close();

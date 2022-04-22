@@ -282,6 +282,14 @@ public class RunningEntryViewController {
     }
 
     private void removeRunningUnitForIndex(int index) {
+        if (index < runningUnits.size()) {
+            // remove the entry from both lists
+            runningUnits.remove(index);
+            runningUnitTableObjects.remove(index);
+            // refresh the table view
+            runningUnitsTableView.getItems().clear();
+            runningUnitsTableView.getItems().addAll(runningUnitTableObjects);
+        }
         if (runningUnitTableObjects.size() == 0) {
             runningUnitsTableView.setContextMenu(null);
         }
