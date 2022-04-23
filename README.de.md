@@ -6,7 +6,7 @@ Ein einfaches Werkzeug zum grafischen Erstellen und Bearbeiten von Vorlagen für
 
 Mit Hilfe des Werkzeuges können bestehende Vorlagen importiert, bearbeitet und exportiert werden.\
 Neue Laufpläne können auf die gleiche Weise erstellt werden.\
-Die Vorlagen werden im JSON-Format gespeichert und können dann in der App\ ["RunningPlan"](https://github.com/hiroladev/RunningPlan) verwendet werden.
+Die Vorlagen werden im JSON-Format gespeichert und können dann in der App ["RunningPlan"](https://github.com/hiroladev/RunningPlan) verwendet werden.
 
 Diese App nutzt das [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) Design Pattern 
 mit [JavaFX](https://openjfx.io/).
