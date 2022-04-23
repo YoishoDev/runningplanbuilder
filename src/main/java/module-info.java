@@ -6,6 +6,7 @@ module de.hirola.runningplanbuilder {
     requires sportsapplications;
     requires com.fasterxml.jackson.core;
     requires org.tinylog.api;
+    requires java.prefs;
 
     opens de.hirola.runningplanbuilder.model to javafx.base;
     opens de.hirola.runningplanbuilder to javafx.fxml;

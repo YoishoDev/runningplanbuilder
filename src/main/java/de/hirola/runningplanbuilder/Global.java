@@ -34,5 +34,11 @@ public final class Global {
     public static final double WEEK_COLUMN_PREF_WIDTH = 80.0;
     public static final double DURATION_COLUMN_PREF_WIDTH = 120.0;
     public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 500.0;
+
+    public static class UserPreferencesKeys {
+        public static final String USE_DEBUG_MODE = "debug.mode";
+        public static final String USE_LAST_DIRECTORY = "json.use.last.directory";
+        public static final String LAST_DIRECTORY = "json.last.directory";
+    }
 }
 

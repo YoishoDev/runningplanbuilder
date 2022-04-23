@@ -1,9 +1,7 @@
 package de.hirola.runningplanbuilder.view;
 
-import de.hirola.runningplanbuilder.controller.RunningEntryViewController;
+import de.hirola.runningplanbuilder.controller.PreferencesViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
-import de.hirola.sportsapplications.SportsLibrary;
-import de.hirola.sportsapplications.model.RunningPlanEntry;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -14,12 +12,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.prefs.Preferences;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
  * This software us licensed under the AGPL-3.0 or later.
  *
- * A view to edit a running entry.
+ * A view to edit a running unit.
  * This dialog is opened modal and waits for the user to close it.
  *
  * The view is created by SceneBuilder and using fxml.
@@ -27,36 +26,34 @@ import java.net.URL;
  * @author Michael Schmidt (Hirola)
  * @since v.0.1
  */
-public class RunningEntryView {
-
-    private final SportsLibrary sportsLibrary;
+public class PreferencesView {
     private final ApplicationResources applicationResources;
 
-    public RunningEntryView(SportsLibrary sportsLibrary) {
-        this.sportsLibrary = sportsLibrary;
+    public PreferencesView() {
         applicationResources = ApplicationResources.getInstance();
     }
 
-    public RunningEntryViewController showViewModal(Node parent, @Nullable RunningPlanEntry runningPlanEntry) throws IOException {
+    public PreferencesViewController showViewModal(@NotNull Node parent, @NotNull Preferences userProperties)
+            throws IOException {
         URL fxmlURL = getClass()
                 .getClassLoader()
-                .getResource("entry-node-view.fxml");
+                .getResource("preferences-view.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load());
+
         // transfer of parameters to the view controller
-        RunningEntryViewController runningEntryViewController = fxmlLoader.getController();
-        runningEntryViewController.setSportsLibrary(sportsLibrary);
-        runningEntryViewController.setRunningPlanEntry(runningPlanEntry);
+        PreferencesViewController preferencesViewController = fxmlLoader.getController();
+        preferencesViewController.setUserPreferences(userProperties);
         stage.setTitle(applicationResources.getString("app.name")
                 + " - "
-                + applicationResources.getString("entryNodeView.title"));
+                + applicationResources.getString("preferencesView.title"));
         stage.initOwner(parent.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setResizable(false);
         stage.setScene(scene);
         stage.showAndWait(); // wait until user closed the dialog
 
-        return runningEntryViewController; // return the controller back to caller
+        return preferencesViewController; // Return the controller back to caller
     }
 }

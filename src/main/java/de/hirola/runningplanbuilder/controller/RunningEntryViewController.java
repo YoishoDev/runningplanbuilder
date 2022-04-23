@@ -17,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -109,14 +110,17 @@ public class RunningEntryViewController {
         this.sportsLibrary = sportsLibrary;
     }
 
+    @Nullable
     public RunningPlanEntry getRunningPlanEntry() {
         return runningPlanEntry;
     }
 
-    public void setRunningPlanEntry(RunningPlanEntry runningPlanEntry) {
+    public void setRunningPlanEntry(@Nullable RunningPlanEntry runningPlanEntry) {
         this.runningPlanEntry = runningPlanEntry;
-        runningUnits = runningPlanEntry.getRunningUnits();
-        showRunningPlanEntryInView();
+        if (runningPlanEntry != null) {
+            runningUnits = runningPlanEntry.getRunningUnits();
+            showRunningPlanEntryInView();
+        }
     }
 
     @FXML
@@ -296,11 +300,12 @@ public class RunningEntryViewController {
     }
 
     private void saveRunningPlanEntry() {
-        if (runningPlanEntry != null) {
-            runningPlanEntry.setDay(trainingDay);
-            runningPlanEntry.setWeek(trainingWeek);
-            runningPlanEntry.setRunningUnits(runningUnits);
+        if (runningPlanEntry == null) {
+            runningPlanEntry = new RunningPlanEntry();
         }
+        runningPlanEntry.setDay(trainingDay);
+        runningPlanEntry.setWeek(trainingWeek);
+        runningPlanEntry.setRunningUnits(runningUnits);
         close();
     }
 

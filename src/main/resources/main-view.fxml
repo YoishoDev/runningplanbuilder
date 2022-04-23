@@ -52,7 +52,7 @@
         <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
             <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
             <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open" />
-            <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#onAction" text="Save" />
+            <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#onAction" text="Save" disable="true"/>
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem fx:id="menuItemQuit" mnemonicParsing="false" onAction="#onAction" text="Quit" />
         </Menu>

@@ -1,8 +1,10 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
+import de.hirola.runningplanbuilder.RunningPlanBuilder;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.runningplanbuilder.view.PreferencesView;
 import de.hirola.runningplanbuilder.view.RunningEntryView;
 import de.hirola.runningplanbuilder.view.RunningPlanView;
 import de.hirola.sportsapplications.SportsLibrary;
@@ -30,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.prefs.Preferences;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -42,16 +46,21 @@ import java.util.List;
  */
 public class MainViewController {
 
+    private final ApplicationResources applicationResources
+            = ApplicationResources.getInstance(); // bundle for localization, ...
+    private Preferences userPreferences;
+    private boolean debugMode;
+    private boolean useLastDirectory;
+    private String lastDirectoryPath;
     private SportsLibrary sportsLibrary;
     private RunningPlan runningPlan; // actual running plan for the application
     private List<RunningPlanEntry> runningPlanEntries;
     private RunningPlanEntry runningPlanEntry; // actual edited running plan entry
     private ObservableList<RunningPlanEntryTableObject> runningPlanEntryTableObjects; // list for the table view
-    private final ApplicationResources applicationResources
-            = ApplicationResources.getInstance(); // bundle for localization, ...
     private HostServices hostServices;
     private RunningPlanView runningPlanView;
     private RunningEntryView runningEntryView;
+    private PreferencesView preferencesView;
     private ContextMenu tableViewContextMenu;
     private MenuItem tableViewContextMenuItemEdit;
     private MenuItem tableViewContextMenuItemDelete;
@@ -145,20 +154,19 @@ public class MainViewController {
     private void initialize() throws InstantiationException, SportsLibraryException {
         runningPlanEntries = new ArrayList<>();
         runningPlanEntryTableObjects = FXCollections.observableArrayList();
-        //TODO: get debug mode from preferences
+        loadUserPreferences();
         // initialize sports library
         File appDirectory = SportsLibrary.initializeAppDirectory(Global.PACKAGE_NAME);
-        sportsLibrary = SportsLibrary.getInstance(true, appDirectory, null);
+        sportsLibrary = SportsLibrary.getInstance(debugMode, appDirectory, null);
         // set nodes to javax default colors
         runningPlanMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
         runningEntryMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
-        // disable different menu items
-        menuItemSave.setDisable(true);
-        menuItemEditRunningPlan.setDisable(true);
         setMenuLabel();  // localisation the menu (item) labels
         setToolMenuLabel(); // localisation the tool "menu" item labels
         initializeTableView();
         createContextMenuForTableView();
+        // disable different menu items
+        canEdited();
     }
 
     @FXML
@@ -174,19 +182,33 @@ public class MainViewController {
             }
         }
         if (event.getSource().equals(menuItemOpen)) {
-            //TODO unsaved values - ask user
-            importJSONFromFile();
+            if (runningPlan != null) {
+                if (continueOperation()) {
+                    importJSONFromFile();
+                }
+            } else {
+                importJSONFromFile();
+            }
         }
         if (event.getSource().equals(menuItemSave)) {
             exportToJSONFile();
         }
         if (event.getSource().equals(menuItemQuit)) {
-            //TODO: unsaved values - ask user
-            Stage stage = (Stage) mainSplitPane.getScene().getWindow();
-            stage.close();
+            if (runningPlan != null) {
+                if (continueOperation()) {
+                    Stage stage = (Stage) mainSplitPane.getScene().getWindow();
+                    stage.close();
+                }
+            } else {
+                Stage stage = (Stage) mainSplitPane.getScene().getWindow();
+                stage.close();
+            }
         }
         if (event.getSource().equals(menuItemEditRunningPlan)) {
             showRunningPlanView();
+        }
+        if (event.getSource().equals(menuItemEditPreferences)) {
+            showPreferencesDialog();
         }
         if (event.getSource().equals(menuItemDebug)) {
             showDebugDialog();
@@ -289,11 +311,7 @@ public class MainViewController {
         try {
             RunningPlanViewController viewController = runningPlanView.showView(mainSplitPane, runningPlan);
             runningPlan = viewController.getRunningPlan();
-            if (runningPlan != null) {
-                // enable different menu item
-                menuItemSave.setDisable(false);
-                menuItemEditRunningPlan.setDisable(false);
-            }
+            canEdited();
         } catch (IOException exception) {
             //TODO: Alert
             exception.printStackTrace();
@@ -302,9 +320,6 @@ public class MainViewController {
 
     private void showRunningEntryView() {
         // show dialog
-        if (runningPlanEntry == null) {
-            runningPlanEntry = new RunningPlanEntry();
-        }
         try {
             // get the running plan entry from modal dialog
             if (runningEntryView == null) {
@@ -338,6 +353,22 @@ public class MainViewController {
         vBox.getChildren().addAll(label, hyperlink);
         alert.getDialogPane().contentProperty().set(vBox);
         alert.showAndWait();
+    }
+
+    private void showPreferencesDialog() {
+        // show dialog
+        try {
+            // get the running plan entry from modal dialog
+            if (preferencesView == null) {
+                preferencesView = new PreferencesView();
+            }
+            PreferencesViewController viewController
+                    = preferencesView.showViewModal(mainSplitPane, userPreferences);
+            userPreferences = viewController.getUserPreferences();
+        } catch (IOException exception) {
+            //TODO: alert
+            exception.printStackTrace();
+        }
     }
 
     private void showAboutDialog() {
@@ -391,15 +422,19 @@ public class MainViewController {
 
     private void importJSONFromFile() {
         // open system file dialog
-        //TODO: set last used dir
-        String initialDirectoryPathString;
-        try {
-            initialDirectoryPathString = System.getProperty("user.home");
-        } catch (SecurityException exception) {
-            initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
+        // user prefs for last directory
+        String directoryPathString;
+        if (useLastDirectory && !lastDirectoryPath.isEmpty()) {
+            directoryPathString = lastDirectoryPath;
+        } else {
+            try {
+                directoryPathString = System.getProperty("user.home");
+            } catch (SecurityException exception) {
+                directoryPathString = "/"; // can be used on linux, macOS and Windows
+            }
         }
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
+        fileChooser.setInitialDirectory(new File(directoryPathString));
         fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
         File jsonFile = fileChooser.showOpenDialog(mainSplitPane.getScene().getWindow());
         if (!jsonFile.exists() || jsonFile.isDirectory() || !jsonFile.canRead()) {
@@ -411,6 +446,9 @@ public class MainViewController {
             alert.setContentText(applicationResources.getString("alert.import.wrong.file.info"));
             alert.showAndWait();
             return;
+        } else {
+            // remember the last used directory
+            saveLastUsedDirectory(jsonFile);
         }
         try {
             // load the plan from json
@@ -426,8 +464,7 @@ public class MainViewController {
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
             // enable editing and saving the running plan
-            menuItemEditRunningPlan.setDisable(false);
-            menuItemSave.setDisable(false);
+            canEdited();
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle(applicationResources.getString("app.name")
@@ -446,12 +483,16 @@ public class MainViewController {
             // get all running entries from editor
             //runningPlan.setEntries(editorViewController.getRunningPlanEntries());
             // set the home as initial directory
-            //TODO: set last used dir
-            String initialDirectoryPathString;
-            try {
-                initialDirectoryPathString = System.getProperty("user.home");
-            } catch (SecurityException exception) {
-                initialDirectoryPathString = "/"; // can be used on linux, macOS and Windows
+            // user prefs for last directory
+            String directoryPathString;
+            if (useLastDirectory && !lastDirectoryPath.isEmpty()) {
+                directoryPathString = lastDirectoryPath;
+            } else {
+                try {
+                    directoryPathString = System.getProperty("user.home");
+                } catch (SecurityException exception) {
+                    directoryPathString = "/"; // can be used on linux, macOS and Windows
+                }
             }
             // get the file name from running plan name, removing empty spaces
             String fileName = runningPlan.getName().replaceAll("\\s","");
@@ -460,10 +501,12 @@ public class MainViewController {
             }
             // get the export directory with file chooser dialog
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setInitialDirectory(new File(initialDirectoryPathString));
+            fileChooser.setInitialDirectory(new File(directoryPathString));
             fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
             fileChooser.setInitialFileName(fileName + Global.TEMPLATE_FILE_EXTENSION);
             File jsonFile = fileChooser.showSaveDialog(mainSplitPane.getScene().getWindow());
+            // remember last used directory
+            saveLastUsedDirectory(jsonFile);
             try {
                 TemplateLoader templateLoader = new TemplateLoader(sportsLibrary);
                 templateLoader.exportRunningPlanToJSON(runningPlan, jsonFile);
@@ -504,5 +547,60 @@ public class MainViewController {
                 alert.close();
             }
         });
+    }
+
+    private boolean continueOperation() {
+        AtomicBoolean doAction = new AtomicBoolean(false);
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("alert.runningplan.overwrite"));
+        ButtonType okButton = new ButtonType(applicationResources
+                .getString("action.yes"), ButtonBar.ButtonData.YES);
+        ButtonType cancelButton = new ButtonType(applicationResources
+                .getString("action.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(okButton, cancelButton);
+        alert.showAndWait().ifPresent(type -> {
+            if (type == okButton) {
+                doAction.set(true);
+            } else {
+                alert.close();
+            }
+        });
+        return doAction.get();
+    }
+
+    // enable / disable editing
+    private void canEdited() {
+        boolean isEditable = runningPlan != null;
+        menuItemEditRunningPlan.setDisable(isEditable);
+        menuItemSave.setDisable(isEditable);
+        if (!runningPlanEntryTableObjects.isEmpty()) {
+            runningPlanEntryTableView.setContextMenu(tableViewContextMenu);
+        } else {
+            runningPlanEntryTableView.setContextMenu(null);
+        }
+    }
+
+    private void loadUserPreferences() {
+        try {
+            userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+            debugMode = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE, false);
+            useLastDirectory = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY, true);
+            lastDirectoryPath = userPreferences.get(Global.UserPreferencesKeys.LAST_DIRECTORY, "");
+        } catch (SecurityException exception) {
+            debugMode = false;
+            useLastDirectory = true;
+            lastDirectoryPath = "";
+            if (sportsLibrary.isDebugMode()) {
+                sportsLibrary.debug(exception, "Error while loading user preferences.");
+            }
+        }
+    }
+
+    private void saveLastUsedDirectory(@NotNull File jsonFile) {
+        lastDirectoryPath = jsonFile.getParent();
+        userPreferences.put(Global.UserPreferencesKeys.LAST_DIRECTORY, lastDirectoryPath);
     }
 }

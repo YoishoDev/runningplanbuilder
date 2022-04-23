@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hirola.runningplanbuilder.controller.PreferencesViewController">
+    <Tab text="Common">
+        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <Label fx:id="debugModeCheckBoxLabel" layoutX="30.0" layoutY="40.0" prefHeight="40.0"
+                   prefWidth="200.0" text="Debug-Modus:">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Label>
+            <CheckBox fx:id="debugModeCheckBox" layoutX="255.0" layoutY="45.0" mnemonicParsing="false"/>
+        </AnchorPane>
+    </Tab>
+    <Tab text="Look &amp; Feel">
+        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <Label fx:id="localizationComboBoxLabel" layoutX="30.0" layoutY="40.0" prefHeight="40.0" prefWidth="120.0" text="Sprache:">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+            <ComboBox fx:id="localizationComboBox" layoutX="251.0" layoutY="47.0" onAction="#onAction" prefWidth="190.0" />
+        </AnchorPane>
+    </Tab>
+    <Tab text="JSON">
+        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <Label fx:id="useLastImportDirCheckBoxLabel" layoutX="30.0" layoutY="40.0" prefHeight="40.0" prefWidth="200.0" text="Letzten Ordner merken:">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+            <CheckBox fx:id="useLastImportDirCheckBox" layoutX="255.0" layoutY="45.0" mnemonicParsing="false" selected="true" />
+        </AnchorPane>
+    </Tab>
+</TabPane>
