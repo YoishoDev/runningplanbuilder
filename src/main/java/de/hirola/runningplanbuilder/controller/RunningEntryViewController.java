@@ -66,7 +66,7 @@ public class RunningEntryViewController {
     @FXML
     private Button saveButton;
     @FXML
-    private Button closeButton;
+    private Button cancelButton;
 
     final EventHandler<ActionEvent> onMenuItemActionEventHandler =
             event -> {
@@ -166,9 +166,9 @@ public class RunningEntryViewController {
             close();
             return;
         }
-        if (event.getSource().equals(closeButton)) {
+        if (event.getSource().equals(cancelButton)) {
             // get a handle to the stage
-            Stage stage = (Stage) closeButton.getScene().getWindow();
+            Stage stage = (Stage) cancelButton.getScene().getWindow();
             stage.close();
         }
         if (event.getSource().equals(weekDayComboBox)) {
@@ -187,7 +187,7 @@ public class RunningEntryViewController {
         runningUnitsLabel.setText(applicationResources.getString("entryNodeView.runningUnitsLabelText"));
         addRunningUnitButton.setText(applicationResources.getString("entryNodeView.addRunningUnitButtonText"));
         saveButton.setText(applicationResources.getString("action.save"));
-        closeButton.setText(applicationResources.getString("action.cancel"));
+        cancelButton.setText(applicationResources.getString("action.cancel"));
     }
 
     private void fillWeekDayComboBox() {
@@ -311,7 +311,7 @@ public class RunningEntryViewController {
 
     private void close() {
         // get a handle to the stage
-        Stage stage = (Stage) closeButton.getScene().getWindow();
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
 }

@@ -11,24 +11,26 @@
             prefHeight="363.0" prefWidth="760.0"
             xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="de.hirola.runningplanbuilder.controller.RunningUnitViewController">
-   <Label fx:id="infoLabel" layoutX="40.0" layoutY="40.0" prefHeight="80.0" prefWidth="700.0" text="Bla Bla Infos" />
-   <Label fx:id="movementTypeComboBoxLabel" layoutX="40.0" layoutY="140.0" prefHeight="40.0" prefWidth="120.0" text="Bewegungsart:">
+   <Label fx:id="infoLabel" layoutX="40.0" layoutY="40.0" prefHeight="80.0" prefWidth="700.0" text="Infos" />
+   <Label fx:id="movementTypeComboBoxLabel" layoutX="40.0" layoutY="140.0" prefHeight="40.0" prefWidth="120.0" text="Movement type:">
       <font>
          <Font size="14.0" />
       </font>
    </Label>
-   <ComboBox fx:id="movementTypeComboBox" layoutX="180.0" layoutY="147.0" onAction="#onAction" prefHeight="26.0" prefWidth="293.0" />
-   <Label fx:id="durationTextFieldLabel" layoutX="40.0" layoutY="200.0" prefHeight="40.0" prefWidth="120.0" text="Dauer (min):">
+   <ComboBox fx:id="movementTypeComboBox" layoutX="200.0" layoutY="147.0" onAction="#onAction" prefHeight="25.0" prefWidth="290.0" />
+   <Label fx:id="movementTypePaceLabel" layoutX="515.0" layoutY="140.0" prefHeight="40.0" prefWidth="200.0" text="Pace (min / km):">
+      <font>
+         <Font size="14.0" />
+      </font>
+   </Label>
+   <Label fx:id="durationTextFieldLabel" layoutX="40.0" layoutY="200.0" prefHeight="40.0" prefWidth="120.0" text="Duration (min):">
       <font>
          <Font size="14.0" />
       </font>
    </Label>
    <TextField fx:id="durationTextField" layoutX="180.0" layoutY="207.0" prefHeight="26.0" prefWidth="90.0" />
-   <Button fx:id="saveButton" layoutX="40.0" layoutY="300.0" mnemonicParsing="false" onAction="#onAction" prefWidth="120.0" text="Speichern" />
-   <Button fx:id="closeButton" layoutX="600.0" layoutY="300.0" mnemonicParsing="false" onAction="#onAction" prefWidth="120.0" text="Schliessen" />
-   <Label fx:id="movementTypePaceLabel" layoutX="494.0" layoutY="140.0" prefHeight="40.0" prefWidth="226.0" text="Pace (min / km):">
-      <font>
-         <Font size="14.0" />
-      </font>
-   </Label>
+   <Button fx:id="saveButton" layoutX="40.0" layoutY="300.0" mnemonicParsing="false" prefWidth="120.0"
+           onAction="#onAction" text="Save" />
+   <Button fx:id="closeButton" layoutX="600.0" layoutY="300.0" mnemonicParsing="false" prefWidth="120.0"
+           onAction="#onAction" text="Cancel" />
 </AnchorPane>

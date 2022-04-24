@@ -9,7 +9,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class RunningEntryView {
     public RunningEntryViewController showViewModal(Node parent, @Nullable RunningPlanEntry runningPlanEntry) throws IOException {
         URL fxmlURL = getClass()
                 .getClassLoader()
-                .getResource("entry-node-view.fxml");
+                .getResource("running-entry-view.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load());

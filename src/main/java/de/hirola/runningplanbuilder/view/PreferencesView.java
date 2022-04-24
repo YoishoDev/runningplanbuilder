@@ -2,17 +2,16 @@ package de.hirola.runningplanbuilder.view;
 
 import de.hirola.runningplanbuilder.controller.PreferencesViewController;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
+import de.hirola.sportsapplications.SportsLibrary;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.prefs.Preferences;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -33,7 +32,7 @@ public class PreferencesView {
         applicationResources = ApplicationResources.getInstance();
     }
 
-    public PreferencesViewController showViewModal(@NotNull Node parent, @NotNull Preferences userProperties)
+    public PreferencesViewController showViewModal(@NotNull Node parent, @NotNull SportsLibrary sportsLibrary)
             throws IOException {
         URL fxmlURL = getClass()
                 .getClassLoader()
@@ -44,7 +43,7 @@ public class PreferencesView {
 
         // transfer of parameters to the view controller
         PreferencesViewController preferencesViewController = fxmlLoader.getController();
-        preferencesViewController.setUserPreferences(userProperties);
+        preferencesViewController.setSportsLibrary(sportsLibrary);
         stage.setTitle(applicationResources.getString("app.name")
                 + " - "
                 + applicationResources.getString("preferencesView.title"));

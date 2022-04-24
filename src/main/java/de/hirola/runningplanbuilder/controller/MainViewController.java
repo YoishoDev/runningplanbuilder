@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.Rectangle;
@@ -267,25 +268,26 @@ public class MainViewController {
         runningPlanEntryTableView.setPlaceholder(
                 new Label(applicationResources.getString("mainView.table.defaultLabelText")));
         runningPlanEntryTableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        runningPlanEntryTableView.setMinSize(Global.MainViewTableViewPreferences.MIN_WITH, Region.USE_PREF_SIZE);
         // TODO: in this version only a single row can be selected
         runningPlanEntryTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         // the table column header
         TableColumn<RunningPlanEntryTableObject, String> weekColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.1.headerText"));
         weekColumn.setCellValueFactory(new PropertyValueFactory<>("weekString"));
-        weekColumn.setPrefWidth(Global.WEEK_COLUMN_PREF_WIDTH);
+        weekColumn.setPrefWidth(Global.MainViewTableViewPreferences.WEEK_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> dayColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.2.headerText"));
         dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
-        dayColumn.setPrefWidth(Global.DAY_COLUMN_PREF_WIDTH);
+        dayColumn.setPrefWidth(Global.MainViewTableViewPreferences.DAY_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> durationColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.3.headerText"));
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationString"));
-        durationColumn.setPrefWidth(Global.DURATION_COLUMN_PREF_WIDTH);
+        durationColumn.setPrefWidth(Global.MainViewTableViewPreferences.DURATION_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.4.headerText"));
         runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
-        runningUnitsColumn.setPrefWidth(Global.RUNNING_UNIT_COLUMN_PREF_WIDTH);
+        runningUnitsColumn.setPrefWidth(Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH);
         runningPlanEntryTableView.getColumns().add(weekColumn);
         runningPlanEntryTableView.getColumns().add(dayColumn);
         runningPlanEntryTableView.getColumns().add(durationColumn);
@@ -362,9 +364,8 @@ public class MainViewController {
             if (preferencesView == null) {
                 preferencesView = new PreferencesView();
             }
-            PreferencesViewController viewController
-                    = preferencesView.showViewModal(mainSplitPane, userPreferences);
-            userPreferences = viewController.getUserPreferences();
+            // actual we do not need any return values
+            preferencesView.showViewModal(mainSplitPane, sportsLibrary);
         } catch (IOException exception) {
             //TODO: alert
             exception.printStackTrace();
