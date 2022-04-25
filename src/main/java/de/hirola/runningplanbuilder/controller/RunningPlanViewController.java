@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class RunningPlanViewController {
 

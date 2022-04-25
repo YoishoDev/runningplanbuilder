@@ -10,11 +10,12 @@ import javafx.stage.FileChooser;
  * Global app settings, can be overwritten by user
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public final class Global {
 
     public static final String PACKAGE_NAME = Global.class.getPackageName();
+
     // JSON im- and export
     public static final FileChooser.ExtensionFilter TEMPLATE_FILE_EXTENSION_FILTER
             = new FileChooser.ExtensionFilter("JSON Format", "*.json");
@@ -31,9 +32,15 @@ public final class Global {
     public static final Color RUNNING_PLAN_TEMPLATE_NODE_COLOR = Color.ALICEBLUE;
     public static final Color RUNNING_UNIT_NODE_COLOR = Color.YELLOW;
 
+    // main view parameter
+    public static class MainViewViewPreferences {
+        public static final double DEFAULT_MAIN_VIEW_WIDTH = 1050.0;
+        public static final double DEFAULT_MAIN_VIEW_HEIGHT = 800.0;
+    }
+
     // main view table
     public static class MainViewTableViewPreferences {
-        public static final double DAY_COLUMN_PREF_WIDTH = 80.0;
+        public static final double DAY_COLUMN_PREF_WIDTH = 100.0;
         public static final double WEEK_COLUMN_PREF_WIDTH = 80.0;
         public static final double DURATION_COLUMN_PREF_WIDTH = 120.0;
         public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 600.0;
@@ -42,11 +49,17 @@ public final class Global {
                 + DURATION_COLUMN_PREF_WIDTH
                 + RUNNING_UNIT_COLUMN_PREF_WIDTH
                 + 10.0;
+
     }
 
     public static class UserPreferencesKeys {
         public static final String LOCALE = "locale";
         public static final String USE_DEBUG_MODE = "debug.mode";
+        public static final String USE_LAST_VIEW_VALUES = "mainview.use.last.size";
+        public static final String LAST_MAIN_VIEW_WIDTH = "mainview.last.width";
+        public static final String LAST_MAIN_VIEW_HEIGHT = "mainview.last.height";
+        public static final String LAST_MAIN_VIEW_POS_X = "mainview.last.posX";
+        public static final String LAST_MAIN_VIEW_POS_Y = "mainview.last.posY";
         public static final String USE_LAST_DIRECTORY = "json.use.last.directory";
         public static final String LAST_DIRECTORY = "json.last.directory";
     }

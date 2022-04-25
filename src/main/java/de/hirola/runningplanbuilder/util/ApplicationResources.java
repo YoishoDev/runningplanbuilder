@@ -17,12 +17,11 @@ import java.util.prefs.Preferences;
  * Manager for app resources.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public final class ApplicationResources
 {
 	private static ApplicationResources instance = null;
-	private static Preferences userPreferences = null;
 	private static final String RESOURCE_NOT_FOUND = "[Resource cannot be found]";
 	private ResourceBundle resourceBundle;
 
@@ -47,21 +46,11 @@ public final class ApplicationResources
 			return RESOURCE_NOT_FOUND;
 		}
 	}
-	
-	/**
-	 * Check if exist a string for a key.
-	 *
-	 * @param key for string
-	 * @return True if the key is found in the resources.
-	 */
-	public boolean containsKey(@NotNull String key) {
-		return resourceBundle.containsKey(key);
-	}
 
 	private ApplicationResources() {
 		try {
 			// get the localization from user preferences
-			userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+			Preferences userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
 			// en_GB, de_AT, ... or en
 			String localeString = userPreferences.get(Global.UserPreferencesKeys.LOCALE, "en");
 			Locale locale;

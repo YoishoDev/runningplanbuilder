@@ -47,7 +47,7 @@
 <VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0"
       xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="de.hirola.runningplanbuilder.controller.MainViewController">
-    <MenuBar fx:id="mainMenuBar" VBox.vgrow="NEVER">
+    <MenuBar VBox.vgrow="NEVER">
         <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
             <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
             <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open" />
@@ -61,6 +61,7 @@
         </Menu>
         <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">
             <MenuItem fx:id="menuItemDebug" mnemonicParsing="false" onAction="#onAction" text="Debug" />
+            <MenuItem fx:id="menuItemLicenses" mnemonicParsing="false" onAction="#onAction" text="Licences" />
             <MenuItem fx:id="menuItemAbout" mnemonicParsing="false" onAction="#onAction" text="RunningPlanBuilder" />
         </Menu>
     </MenuBar>

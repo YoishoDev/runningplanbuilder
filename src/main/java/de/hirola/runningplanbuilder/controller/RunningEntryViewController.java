@@ -14,7 +14,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +29,7 @@ import java.util.List;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class RunningEntryViewController {
     private final ApplicationResources applicationResources
@@ -45,8 +44,6 @@ public class RunningEntryViewController {
     private MenuItem tableViewContextMenuItemDelete;
     private RunningUnitView runningUnitView;
     // created with SceneBuilder
-    @FXML
-    private AnchorPane anchorPane;
     @FXML
     private Label infoLabel;
     @FXML
@@ -86,7 +83,7 @@ public class RunningEntryViewController {
                                         = runningUnitView.showViewModal(addRunningUnitButton, runningUnit);
                                 runningUnit = viewController.getRunningUnit();
                                 if (runningUnit != null) {
-                                    runningUnitsTableView.refresh();
+                                    addOrUpdateRunningUnit(runningUnit);
                                 }
                             } catch (IOException exception) {
                                 //TODO: alert
@@ -153,7 +150,7 @@ public class RunningEntryViewController {
                 if (runningUnit != null) {
                     // a new running unit is created or
                     // an existing running unit is updated perhaps
-                    addRunningUnit(runningUnit);
+                    addOrUpdateRunningUnit(runningUnit);
                 }
             } catch (IOException exception) {
                 //TODO: alert
@@ -268,13 +265,22 @@ public class RunningEntryViewController {
         }
     }
 
-    private void addRunningUnit(RunningUnit runningUnit) {
+    private void addOrUpdateRunningUnit(RunningUnit unit) {
         // if the running unit is new, add it to the list
-        if (!runningUnits.contains(runningUnit)) {
+        if (!runningUnits.contains(unit)) {
             // add to the running unit list of entry
-            runningUnits.add(runningUnit);
+            runningUnits.add(unit);
             // add to table object list
-            runningUnitTableObjects.add(new RunningUnitTableObject(runningUnit));
+            runningUnitTableObjects.add(new RunningUnitTableObject(unit));
+        } else {
+            // the unit can be updated - update the table objects
+            // using the easiest way
+            runningUnitsTableView.getItems().clear();
+            runningUnitTableObjects.clear();
+            for (RunningUnit unit1: runningUnits) {
+                runningUnitTableObjects.add(new RunningUnitTableObject(unit1));
+            }
+            runningUnitsTableView.getItems().addAll(runningUnitTableObjects);
         }
         // add context menu to table view
         if (runningUnitTableObjects.size() == 1) {

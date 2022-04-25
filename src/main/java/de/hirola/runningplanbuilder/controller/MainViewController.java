@@ -27,6 +27,7 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -43,10 +44,12 @@ import java.util.prefs.Preferences;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class MainViewController {
 
+    private Stage mainWindow;
+    private HostServices hostServices;
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private Preferences userPreferences;
@@ -58,7 +61,6 @@ public class MainViewController {
     private List<RunningPlanEntry> runningPlanEntries;
     private RunningPlanEntry runningPlanEntry; // actual edited running plan entry
     private ObservableList<RunningPlanEntryTableObject> runningPlanEntryTableObjects; // list for the table view
-    private HostServices hostServices;
     private RunningPlanView runningPlanView;
     private RunningEntryView runningEntryView;
     private PreferencesView preferencesView;
@@ -69,9 +71,6 @@ public class MainViewController {
 
     // main app menu
     // created with SceneBuilder
-    @FXML
-    // the reference will be injected by the FXML loader
-    private MenuBar mainMenuBar;
     @FXML
     // the reference will be injected by the FXML loader
     private Menu menuFile;  // file menu
@@ -104,6 +103,9 @@ public class MainViewController {
     private MenuItem menuItemDebug;
     @FXML
     // the reference will be injected by the FXML loader
+    private MenuItem menuItemLicenses;
+    @FXML
+    // the reference will be injected by the FXML loader
     private MenuItem menuItemAbout;
 
     // tool "menu"
@@ -122,7 +124,7 @@ public class MainViewController {
     @FXML
     private TableView<RunningPlanEntryTableObject> runningPlanEntryTableView;
 
-    final EventHandler<ActionEvent> onMenuItemActionEventHandler =
+    private final EventHandler<ActionEvent> onMenuItemActionEventHandler =
             event -> {
                 if (event.getSource() instanceof MenuItem) {
                     // context menu action from table view
@@ -144,7 +146,19 @@ public class MainViewController {
                 }
             };
 
+    private final EventHandler<WindowEvent> onWindowEventHandler =
+            event -> {
+                if (event.getSource() instanceof Stage) {
+                    saveLastWindowValues();
+                }
+            };
+
     public MainViewController() {}
+
+    public void setMainWindow(Stage mainWindow) {
+        this.mainWindow = mainWindow;
+        mainWindow.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, onWindowEventHandler);
+    }
 
     public void setHostServices(@NotNull HostServices hostServices) {
         this.hostServices = hostServices;
@@ -166,8 +180,7 @@ public class MainViewController {
         setToolMenuLabel(); // localisation the tool "menu" item labels
         initializeTableView();
         createContextMenuForTableView();
-        // disable different menu items
-        canEdited();
+        canEdited(); // disable different menu items
     }
 
     @FXML
@@ -197,12 +210,12 @@ public class MainViewController {
         if (event.getSource().equals(menuItemQuit)) {
             if (runningPlan != null) {
                 if (continueOperation()) {
-                    Stage stage = (Stage) mainSplitPane.getScene().getWindow();
-                    stage.close();
+                    saveLastWindowValues();
+                    mainWindow.close();
                 }
             } else {
-                Stage stage = (Stage) mainSplitPane.getScene().getWindow();
-                stage.close();
+                saveLastWindowValues();
+                mainWindow.close();
             }
         }
         if (event.getSource().equals(menuItemEditRunningPlan)) {
@@ -213,6 +226,9 @@ public class MainViewController {
         }
         if (event.getSource().equals(menuItemDebug)) {
             showDebugDialog();
+        }
+        if (event.getSource().equals(menuItemLicenses)) {
+            showLicensesDialog();
         }
         if (event.getSource().equals(menuItemAbout)) {
             showAboutDialog();
@@ -254,6 +270,7 @@ public class MainViewController {
         menuItemEditPreferences.setText(applicationResources.getString("mainMenuBar.menuEdit.menuItemPreferences"));
         menuHelp.setText(applicationResources.getString("mainMenuBar.menuHelp"));
         menuItemDebug.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemDebug"));
+        menuItemLicenses.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemLicenses"));
         menuItemAbout.setText(applicationResources.getString("mainMenuBar.menuHelp.menuItemAbout"));
     }
 
@@ -331,7 +348,7 @@ public class MainViewController {
                     = runningEntryView.showViewModal(mainSplitPane, runningPlanEntry);
             runningPlanEntry = viewController.getRunningPlanEntry();
             if (runningPlanEntry != null) {
-                addRunningPlanEntry(runningPlanEntry);
+                addOrUpdateRunningPlanEntry(runningPlanEntry);
             }
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
@@ -340,21 +357,6 @@ public class MainViewController {
             //TODO: alert
             exception.printStackTrace();
         }
-    }
-
-    private void showDebugDialog() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(applicationResources.getString("app.name")
-                + " "
-                + applicationResources.getString("app.version"));
-        alert.setHeaderText(applicationResources.getString("debug.alert.header"));
-        VBox vBox = new VBox();
-        Label label = new Label(applicationResources.getString("debug.alert.info"));
-        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("debug.alert.info.url"));
-        hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
-        vBox.getChildren().addAll(label, hyperlink);
-        alert.getDialogPane().contentProperty().set(vBox);
-        alert.showAndWait();
     }
 
     private void showPreferencesDialog() {
@@ -372,22 +374,52 @@ public class MainViewController {
         }
     }
 
-    private void showAboutDialog() {
+    private void showDebugDialog() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(applicationResources.getString("app.name")
                 + " "
                 + applicationResources.getString("app.version"));
-        alert.setHeaderText(applicationResources.getString("about.alert.header"));
+        alert.setHeaderText(applicationResources.getString("alert.debug.header"));
         VBox vBox = new VBox();
-        Label label = new Label(applicationResources.getString("about.alert.info"));
-        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("about.alert.info.url"));
+        Label label = new Label(applicationResources.getString("alert.debug.info"));
+        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("alert.debug.info.url"));
         hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
         vBox.getChildren().addAll(label, hyperlink);
         alert.getDialogPane().contentProperty().set(vBox);
         alert.showAndWait();
     }
 
-    private void addRunningPlanEntry(@NotNull RunningPlanEntry entry) {
+    private void showLicensesDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("alert.licenses.header"));
+        VBox vBox = new VBox();
+        Label label = new Label(applicationResources.getString("alert.licenses.info"));
+        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("alert.licenses.info.url"));
+        hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
+        vBox.getChildren().addAll(label, hyperlink);
+        alert.getDialogPane().contentProperty().set(vBox);
+        alert.showAndWait();
+    }
+
+    private void showAboutDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(applicationResources.getString("app.name")
+                + " "
+                + applicationResources.getString("app.version"));
+        alert.setHeaderText(applicationResources.getString("alert.about.header"));
+        VBox vBox = new VBox();
+        Label label = new Label(applicationResources.getString("alert.about.info"));
+        Hyperlink hyperlink = new Hyperlink(applicationResources.getString("alert.about.info.url"));
+        hyperlink.setOnAction((event) -> hostServices.showDocument(hyperlink.getText()));
+        vBox.getChildren().addAll(label, hyperlink);
+        alert.getDialogPane().contentProperty().set(vBox);
+        alert.showAndWait();
+    }
+
+    private void addOrUpdateRunningPlanEntry(@NotNull RunningPlanEntry entry) {
         // if the running entry is new, add it to the list
         if (!runningPlanEntries.contains(entry)) {
             // add to the running entry list of running plan
@@ -395,8 +427,14 @@ public class MainViewController {
             // add to table object list
             runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
         } else {
-            // the entry can be updated - update the table object
-
+            // the entry can be updated - update the table objects
+            // using the easiest way
+            runningPlanEntryTableView.getItems().clear();
+            runningPlanEntryTableObjects.clear();
+            for (RunningPlanEntry entry1: runningPlanEntries) {
+                runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry1));
+            }
+            runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
         }
         // add context menu to table view
         if (runningPlanEntryTableObjects.size() == 1) {
@@ -481,10 +519,8 @@ public class MainViewController {
 
     private void exportToJSONFile() {
         if (runningPlan != null) {
-            // get all running entries from editor
-            //runningPlan.setEntries(editorViewController.getRunningPlanEntries());
-            // set the home as initial directory
-            // user prefs for last directory
+            // overwrite the entries with the actual list
+            runningPlan.setEntries(runningPlanEntries);
             String directoryPathString;
             if (useLastDirectory && !lastDirectoryPath.isEmpty()) {
                 directoryPathString = lastDirectoryPath;
@@ -574,7 +610,7 @@ public class MainViewController {
 
     // enable / disable editing
     private void canEdited() {
-        boolean isEditable = runningPlan != null;
+        boolean isEditable = runningPlan == null;
         menuItemEditRunningPlan.setDisable(isEditable);
         menuItemSave.setDisable(isEditable);
         if (!runningPlanEntryTableObjects.isEmpty()) {
@@ -603,5 +639,16 @@ public class MainViewController {
     private void saveLastUsedDirectory(@NotNull File jsonFile) {
         lastDirectoryPath = jsonFile.getParent();
         userPreferences.put(Global.UserPreferencesKeys.LAST_DIRECTORY, lastDirectoryPath);
+    }
+
+    private void saveLastWindowValues() {
+        userPreferences.putDouble(Global.UserPreferencesKeys.LAST_MAIN_VIEW_WIDTH,
+                mainWindow.getWidth());
+        userPreferences.putDouble(Global.UserPreferencesKeys.LAST_MAIN_VIEW_HEIGHT,
+                mainWindow.getHeight());
+        userPreferences.putDouble(Global.UserPreferencesKeys.LAST_MAIN_VIEW_POS_X,
+                mainWindow.getX());
+        userPreferences.putDouble(Global.UserPreferencesKeys.LAST_MAIN_VIEW_POS_Y,
+                mainWindow.getY());
     }
 }

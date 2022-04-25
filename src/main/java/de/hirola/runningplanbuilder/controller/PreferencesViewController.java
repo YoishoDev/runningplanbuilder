@@ -24,7 +24,7 @@ import java.util.prefs.Preferences;
  * Controller for the preferences view using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class PreferencesViewController {
 
@@ -50,6 +50,10 @@ public class PreferencesViewController {
     private ComboBox<String> localizationComboBox;
     @FXML
     private Label localizationComboBoxInfoLabel;
+    @FXML
+    private Label useLastWindowValuesCheckBoxLabel;
+    @FXML
+    private CheckBox useLastWindowValuesCheckBox;
 
     // tab import / export
     @FXML
@@ -77,6 +81,8 @@ public class PreferencesViewController {
         if (userPreferences != null) {
             debugModeCheckBox.setSelected(userPreferences.getBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE,
                     false));
+            useLastWindowValuesCheckBox.setSelected(userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_VIEW_VALUES,
+                    false));
             useLastImportDirCheckBox.setSelected(userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY,
                     false));
         }
@@ -103,8 +109,16 @@ public class PreferencesViewController {
                 }
             }
             if (event.getSource().equals(debugModeCheckBox)) {
-                userPreferences.putBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE,
-                        debugModeCheckBox.isSelected());
+                boolean debugMode = debugModeCheckBox.isSelected();
+                userPreferences.putBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE, debugMode);
+                if (debugMode) {
+                    debugModeCheckBoxInfoLabel.setText(applicationResources
+                            .getString("preferencesView.debugModeCheckBoxInfoLabel.text"));
+                }
+            }
+            if (event.getSource().equals(useLastWindowValuesCheckBox)) {
+                userPreferences.putBoolean(Global.UserPreferencesKeys.USE_LAST_VIEW_VALUES,
+                        useLastWindowValuesCheckBox.isSelected());
             }
             if (event.getSource().equals(useLastImportDirCheckBox)) {
                 userPreferences.putBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY,
@@ -118,6 +132,8 @@ public class PreferencesViewController {
                 .getString("preferencesView.debugModeCheckBoxLabel.text"));
         localizationComboBoxLabel.setText(applicationResources
                 .getString("preferencesView.localizationComboBoxLabel.text"));
+        useLastWindowValuesCheckBoxLabel.setText(applicationResources
+                .getString("preferencesView.useLastWindowSizeCheckBoxLabel.text"));
         useLastImportDirCheckBoxLabel.setText(applicationResources
                 .getString("preferencesView.useLastImportDirCheckBoxLabel.text"));
     }

@@ -7,7 +7,6 @@ import de.hirola.sportsapplications.model.RunningUnit;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +20,7 @@ import java.util.List;
  * Controller for the main view (application window) using fxml.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class RunningUnitViewController {
     private SportsLibrary sportsLibrary;
@@ -32,8 +31,6 @@ public class RunningUnitViewController {
             = ApplicationResources.getInstance(); // bundle for localization, ...
 
     // created with SceneBuilder
-    @FXML
-    private AnchorPane anchorPane;
     @FXML
     private Label infoLabel;
     @FXML
@@ -68,6 +65,7 @@ public class RunningUnitViewController {
 
     public void setRunningUnit(@Nullable RunningUnit runningUnit) {
         this.runningUnit = runningUnit;
+        showRunningUnitInView();
     }
 
     @FXML
@@ -88,18 +86,15 @@ public class RunningUnitViewController {
     @FXML
     // use for onAction by the FXML loader
     private void onAction(ActionEvent event) {
+        if (event.getSource().equals(movementTypeComboBox)) {
+            int index = movementTypeComboBox.getSelectionModel().getSelectedIndex();
+            setMovementType(index); // set the selected movement type and show the pace for the type
+        }
         if (event.getSource().equals(saveButton)) {
             saveRunningUnit();
-            return;
         }
         if (event.getSource().equals(closeButton)) {
             close();
-            return;
-        }
-        if (event.getSource().equals(movementTypeComboBox)) {
-            //TODO: user preferences: km/h or pace
-            int index = movementTypeComboBox.getSelectionModel().getSelectedIndex();
-            setMovementType(index); // set the selected movement type and show the pace for the type
         }
     }
 

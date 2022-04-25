@@ -17,7 +17,7 @@ import java.util.Objects;
  * A helper class to view an entry of a running plan in table view.
  *
  * @author Michael Schmidt (Hirola)
- * @since v.0.1
+ * @since v0.1
  */
 public class RunningPlanEntryTableObject {
     private final ApplicationResources applicationResources;
