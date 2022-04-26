@@ -32,7 +32,7 @@ public class MainView {
 
     public MainView() {
         applicationResources = ApplicationResources.getInstance();
-        userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+        userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
     }
 
     public void showView(Stage stage, Application application) throws IOException {

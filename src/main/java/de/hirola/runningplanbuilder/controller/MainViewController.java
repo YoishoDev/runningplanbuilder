@@ -172,7 +172,7 @@ public class MainViewController {
         loadUserPreferences();
         // initialize sports library
         File appDirectory = SportsLibrary.initializeAppDirectory(Global.PACKAGE_NAME);
-        sportsLibrary = SportsLibrary.getInstance(debugMode, appDirectory, null);
+        sportsLibrary = SportsLibrary.getInstance(debugMode, applicationResources.getAppLocale(), appDirectory, null);
         // set nodes to javax default colors
         runningPlanMenuElement.setFill(Global.RUNNING_PLAN_TEMPLATE_NODE_COLOR);
         runningEntryMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
@@ -622,7 +622,7 @@ public class MainViewController {
 
     private void loadUserPreferences() {
         try {
-            userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+            userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
             debugMode = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE, false);
             useLastDirectory = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY, true);
             lastDirectoryPath = userPreferences.get(Global.UserPreferencesKeys.LAST_DIRECTORY, "");

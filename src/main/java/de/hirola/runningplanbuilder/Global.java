@@ -1,7 +1,10 @@
 package de.hirola.runningplanbuilder;
 
+import de.hirola.sportsapplications.SportsLibrary;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+
+import java.util.Locale;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -14,7 +17,10 @@ import javafx.stage.FileChooser;
  */
 public final class Global {
 
-    public static final String PACKAGE_NAME = Global.class.getPackageName();
+    public static final String PACKAGE_NAME =  RunningPlanBuilder.class.getPackageName();
+    public static final String ROOT_RESOURCE_BUNDLE_BASE_NAME = RunningPlanBuilder.class.getSimpleName();
+
+    public static final Locale DEFAULT_LOCALE = new Locale("en");
 
     // JSON im- and export
     public static final FileChooser.ExtensionFilter TEMPLATE_FILE_EXTENSION_FILTER
@@ -53,6 +59,7 @@ public final class Global {
     }
 
     public static class UserPreferencesKeys {
+        public static final String USER_ROOT_NODE = RunningPlanBuilder.class.getName();
         public static final String LOCALE = "locale";
         public static final String USE_DEBUG_MODE = "debug.mode";
         public static final String USE_LAST_VIEW_VALUES = "mainview.use.last.size";

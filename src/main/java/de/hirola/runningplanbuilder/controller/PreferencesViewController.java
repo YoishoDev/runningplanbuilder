@@ -72,7 +72,7 @@ public class PreferencesViewController {
     private void initialize() {
         localizationKeys = new ArrayList<>();
         try {
-            userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+            userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
         } catch (SecurityException exception) {
             if (sportsLibrary.isDebugMode()) {
                 sportsLibrary.debug(exception, "Error while loading the user preferences.");

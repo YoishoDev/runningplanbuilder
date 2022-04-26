@@ -24,6 +24,7 @@ public final class ApplicationResources
 	private static ApplicationResources instance = null;
 	private static final String RESOURCE_NOT_FOUND = "[Resource cannot be found]";
 	private ResourceBundle resourceBundle;
+	private Locale appLocale;
 
 	public static ApplicationResources getInstance() {
 		if (instance == null) {
@@ -47,26 +48,37 @@ public final class ApplicationResources
 		}
 	}
 
+	/**
+	 * Returns the locale chosen by the user.
+	 * If the corresponding bundle was not found, a default locale is returned.
+	 * @see Global
+	 *
+	 * @return The locale chosen by the user or a default locale.
+	 */
+	public Locale getAppLocale() {
+		return appLocale;
+	}
+
 	private ApplicationResources() {
 		try {
 			// get the localization from user preferences
-			Preferences userPreferences = Preferences.userRoot().node(RunningPlanBuilder.class.getName());
+			Preferences userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
 			// en_GB, de_AT, ... or en
-			String localeString = userPreferences.get(Global.UserPreferencesKeys.LOCALE, "en");
-			Locale locale;
+			String localeString = userPreferences.get(Global.UserPreferencesKeys.LOCALE,
+					Global.DEFAULT_LOCALE.toLanguageTag());
 			if (localeString.contains("_") && localeString.length() == 5) {
 				// language and country
 				String language = localeString.substring(0, 2).toLowerCase(Locale.ROOT);
 				String country  = localeString.substring(2, 5).toUpperCase(Locale.ROOT);
-				locale = new Locale(language, country);
+				appLocale = new Locale(language, country);
 			} else {
 				// only the language
-				locale = new Locale(localeString);
+				appLocale = new Locale(localeString);
 			}
-			resourceBundle = ResourceBundle.getBundle(RunningPlanBuilder.class.getSimpleName(), locale);
+			resourceBundle = ResourceBundle.getBundle(Global.ROOT_RESOURCE_BUNDLE_BASE_NAME, appLocale);
 		} catch (SecurityException exception) {
 			// load default (english) bundle
-			resourceBundle = ResourceBundle.getBundle(RunningPlanBuilder.class.getSimpleName());
+			resourceBundle = ResourceBundle.getBundle(Global.ROOT_RESOURCE_BUNDLE_BASE_NAME);
 		}
 	}
 }
