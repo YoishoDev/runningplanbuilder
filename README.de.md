@@ -17,9 +17,23 @@ Vom Werkzeug ...\
 Zu JSON ...\
 ![json](https://user-images.githubusercontent.com/48058062/164887804-0f1d1c88-6496-450c-b68b-bbd388325079.png)
 
+## Nutzung
+
+Die App wurde in der Programmiersprache [Java](https://de.wikipedia.org/wiki/Java-Technologie) entwickelt und nutzt für die grafischen Komponenten die Bibliotheken [JavaFX](https://openjfx.io/).\
+Für die Nutzung der App benötigen Sie deshalb eine sog. Laufzeitumgebung und die Kompontenen von JavaFX.
+
+Auf meiner Internetseite stelle ich weitere Downloads zur Verfügung.\
+Für Windows gibt es einen Donwload mit der benötigten Laufzeitumgebung als [ZIP-Archiv](https://www.hirola.de/content/perma?id=243).\
+Das Programm (EXE) kann nach dem Entpacken direkt (aus dem Ordner) gestartet werden. 
+
+Außerdem finden Sie dort noch eine (kleinere) [EXE-Datei](https://www.hirola.de/content/perma?id=249), welche allerdings eine installierte Laufzeitumgebung und JavaFX-Kompontenen voraussetzt.
+Eien solche kostenfreie Java-Runtime (JRE) mit den JavaFX-Komponenten finden Sie z.B. bei [Bellsoft](https://bell-sw.com/pages/downloads/?version=java-11-lts&os=Windows).
+
 ## Links
 
 [Laufpläne von Herrn Zangl](https://lauftipps.ch/kostenlose-trainingsplaene/)
+
+[Meine Internetseite](https://www.hirola.de/s/laufplan-runningplan)
 
 [Mein XING-Profil](https://www.xing.com/profile/Michael_Schmidt2350/cv) 
 <image src="https://user-images.githubusercontent.com/48058062/152635585-d82a0f6d-1c4b-42c5-831f-eaf3caba1bd8.png" width="20" height="20">
