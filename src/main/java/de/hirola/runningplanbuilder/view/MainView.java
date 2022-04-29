@@ -8,10 +8,12 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.prefs.Preferences;
 
@@ -68,6 +70,11 @@ public class MainView {
         stage.setTitle(applicationResources.getString("app.name")
                 + " "
                 + applicationResources.getString("app.version"));
+        InputStream inputStream = RunningPlanBuilder.class.getResourceAsStream(Global.APP_ICON);
+        if (inputStream != null) {
+            Image appIcon = new Image(inputStream);
+            stage.getIcons().add(appIcon);
+        }
         stage.setScene(scene);
         stage.show();
     }

@@ -20,6 +20,8 @@ public final class Global {
     public static final String PACKAGE_NAME =  RunningPlanBuilder.class.getPackageName();
     public static final String ROOT_RESOURCE_BUNDLE_BASE_NAME = RunningPlanBuilder.class.getSimpleName();
 
+    public static final String APP_ICON = "/appicon.png";
+
     public static final Locale DEFAULT_LOCALE = new Locale("en");
 
     // JSON im- and export
