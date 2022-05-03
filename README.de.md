@@ -27,7 +27,7 @@ Für Windows gibt es einen Donwload mit der benötigten Laufzeitumgebung als [ZI
 Das Programm (EXE) kann nach dem Entpacken direkt (aus dem Ordner) gestartet werden. 
 
 Außerdem finden Sie dort noch eine (kleinere) [EXE-Datei](https://www.hirola.de/content/perma?id=249), welche allerdings eine installierte Laufzeitumgebung und JavaFX-Kompontenen voraussetzt.
-Eien solche kostenfreie Java-Runtime (JRE) mit den JavaFX-Komponenten finden Sie z.B. bei [Bellsoft](https://bell-sw.com/pages/downloads/?version=java-11-lts&os=Windows).
+Eine solche kostenfreie Java-Runtime (JRE) mit den JavaFX-Komponenten finden Sie z.B. bei [Bellsoft](https://bell-sw.com/pages/downloads/?version=java-11-lts&os=Windows).
 
 Bitte beachten Sie für die Nutzung die [Lizenzbedingungen](https://github.com/hiroladev/RunningPlanBuilder/wiki/Lizenzen) der genutzten Bibliotheken Dritter.
 
