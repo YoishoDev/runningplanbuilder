@@ -4,6 +4,8 @@ import de.hirola.sportsapplications.model.MovementType;
 import de.hirola.sportsapplications.model.RunningUnit;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
  * This software us licensed under the AGPL-3.0 or later.
@@ -20,8 +22,9 @@ public class RunningUnitTableObject {
 
     public RunningUnitTableObject(@NotNull RunningUnit runningUnit) {
         duration = runningUnit.getDuration() + " min";
-        MovementType movementType = runningUnit.getMovementType();
-        if (movementType != null) {
+        Optional<MovementType> optionalMovementType = runningUnit.getMovementType();
+        if (optionalMovementType.isPresent()) {
+            MovementType movementType = optionalMovementType.get();
             key = movementType.getKey();
             name = movementType.getName();
         } else {

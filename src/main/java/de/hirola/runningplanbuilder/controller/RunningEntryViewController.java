@@ -243,6 +243,8 @@ public class RunningEntryViewController {
 
     private void showRunningPlanEntryInView() {
         if (runningPlanEntry != null) {
+            infoLabel.setText(runningPlanEntry.getRemarks()
+                    .orElse(applicationResources.getString("runningplanentry.remarks.default")));
             // set values for day and week, select the combo boxes
             trainingDay = runningPlanEntry.getDay() ;
             trainingWeek = runningPlanEntry.getWeek();

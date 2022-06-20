@@ -99,7 +99,7 @@ public class RunningPlanViewController {
     private void showRunningPlanInView() {
         if (runningPlan != null) {
             nameTextField.setText(runningPlan.getName());
-            remarksTextArea.setText(runningPlan.getRemarks());
+            remarksTextArea.setText(runningPlan.getRemarks().orElse(""));
             orderNumber = runningPlan.getOrderNumber();
             // select the order number in combo box
             if (orderNumberComboBox.getItems().size() < orderNumber
@@ -137,7 +137,7 @@ public class RunningPlanViewController {
                // update the name only if not empty
                runningPlan.setName(nameTextField.getText());
            }
-           if (remarksTextFieldIsEmpty && !runningPlan.getRemarks().isEmpty()) {
+           if (remarksTextFieldIsEmpty && runningPlan.getRemarks().isPresent()) {
                Alert alert = new Alert(Alert.AlertType.WARNING);
                alert.setTitle(applicationResources.getString("app.name")
                        + " "

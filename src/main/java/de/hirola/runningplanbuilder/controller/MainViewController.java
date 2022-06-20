@@ -1,7 +1,6 @@
 package de.hirola.runningplanbuilder.controller;
 
 import de.hirola.runningplanbuilder.Global;
-import de.hirola.runningplanbuilder.RunningPlanBuilder;
 import de.hirola.runningplanbuilder.model.*;
 import de.hirola.runningplanbuilder.util.ApplicationResources;
 import de.hirola.runningplanbuilder.view.PreferencesView;
@@ -11,6 +10,7 @@ import de.hirola.sportsapplications.SportsLibrary;
 import de.hirola.sportsapplications.SportsLibraryException;
 import de.hirola.sportsapplications.model.RunningPlan;
 import de.hirola.sportsapplications.model.RunningPlanEntry;
+import de.hirola.sportsapplications.util.ICALManager;
 import de.hirola.sportsapplications.util.TemplateLoader;
 import javafx.application.HostServices;
 import javafx.collections.FXCollections;
@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Arc;
@@ -79,7 +80,10 @@ public class MainViewController {
     private MenuItem menuItemNew;
     @FXML
     // the reference will be injected by the FXML loader
-    private MenuItem menuItemOpen;
+    private MenuItem menuItemImportJSON;
+    @FXML
+    // the reference will be injected by the FXML loader
+    private MenuItem menuItemImportICAL;
     @FXML
     // the reference will be injected by the FXML loader
     private MenuItem menuItemSave;
@@ -195,13 +199,22 @@ public class MainViewController {
                 showRunningPlanView();
             }
         }
-        if (event.getSource().equals(menuItemOpen)) {
+        if (event.getSource().equals(menuItemImportJSON)) {
             if (runningPlan != null) {
                 if (continueOperation()) {
                     importJSONFromFile();
                 }
             } else {
                 importJSONFromFile();
+            }
+        }
+        if (event.getSource().equals(menuItemImportICAL)) {
+            if (runningPlan != null) {
+                if (continueOperation()) {
+                    importICALFromFile();
+                }
+            } else {
+                importICALFromFile();
             }
         }
         if (event.getSource().equals(menuItemSave)) {
@@ -262,7 +275,8 @@ public class MainViewController {
     private void setMenuLabel() {
         menuFile.setText(applicationResources.getString("mainMenuBar.menuFile"));
         menuItemNew.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemNew"));
-        menuItemOpen.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemOpen"));
+        menuItemImportJSON.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemImportJSON"));
+        menuItemImportICAL.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemImportICAL"));
         menuItemSave.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemSave"));
         menuItemQuit.setText(applicationResources.getString("mainMenuBar.menuFile.menuItemQuit"));
         menuEdit.setText(applicationResources.getString("mainMenuBar.menuEdit"));
@@ -290,24 +304,32 @@ public class MainViewController {
         runningPlanEntryTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         // the table column header
         TableColumn<RunningPlanEntryTableObject, String> weekColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.1.headerText"));
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.week.headerText"));
         weekColumn.setCellValueFactory(new PropertyValueFactory<>("weekString"));
         weekColumn.setPrefWidth(Global.MainViewTableViewPreferences.WEEK_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> dayColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.2.headerText"));
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.day.headerText"));
         dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
         dayColumn.setPrefWidth(Global.MainViewTableViewPreferences.DAY_COLUMN_PREF_WIDTH);
         TableColumn<RunningPlanEntryTableObject, String> durationColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.3.headerText"));
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.duration.headerText"));
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationString"));
-        durationColumn.setPrefWidth(Global.MainViewTableViewPreferences.DURATION_COLUMN_PREF_WIDTH);
+        durationColumn.setPrefWidth(Global.MainViewTableViewPreferences.DISTANCE_COLUMN_PREF_WIDTH);
+        TableColumn<RunningPlanEntryTableObject, String> distanceColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.distance.headerText"));
+        distanceColumn.setCellValueFactory(new PropertyValueFactory<>("distanceString"));
+        TableColumn<RunningPlanEntryTableObject, String> remarksColumn
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.remarks.headerText"));
+        remarksColumn.setCellValueFactory(new PropertyValueFactory<>("remarksString"));
         TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.4.headerText"));
+                = new TableColumn<>(applicationResources.getString("mainView.table.column.entries.headerText"));
         runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
-        runningUnitsColumn.setPrefWidth(Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH);
+        remarksColumn.setPrefWidth(Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH);
         runningPlanEntryTableView.getColumns().add(weekColumn);
         runningPlanEntryTableView.getColumns().add(dayColumn);
         runningPlanEntryTableView.getColumns().add(durationColumn);
+        runningPlanEntryTableView.getColumns().add(distanceColumn);
+        runningPlanEntryTableView.getColumns().add(remarksColumn);
         runningPlanEntryTableView.getColumns().add(runningUnitsColumn);
     }
 
@@ -474,7 +496,7 @@ public class MainViewController {
         }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(directoryPathString));
-        fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
+        fileChooser.setSelectedExtensionFilter(Global.JSON_FILE_EXTENSION_FILTER);
         File jsonFile = fileChooser.showOpenDialog(mainSplitPane.getScene().getWindow());
         if (!jsonFile.exists() || jsonFile.isDirectory() || !jsonFile.canRead()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -517,6 +539,63 @@ public class MainViewController {
         }
     }
 
+    private void importICALFromFile() {
+        // open system file dialog
+        // user prefs for last directory
+        String directoryPathString;
+        if (useLastDirectory && !lastDirectoryPath.isEmpty()) {
+            directoryPathString = lastDirectoryPath;
+        } else {
+            try {
+                directoryPathString = System.getProperty("user.home");
+            } catch (SecurityException exception) {
+                directoryPathString = "/"; // can be used on linux, macOS and Windows
+            }
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(directoryPathString));
+        fileChooser.setSelectedExtensionFilter(Global.ICAL_FILE_EXTENSION_FILTER);
+        File iCALFile = fileChooser.showOpenDialog(mainSplitPane.getScene().getWindow());
+        if (!iCALFile.exists() || iCALFile.isDirectory() || !iCALFile.canRead()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(applicationResources.getString("app.name")
+                    + " "
+                    + applicationResources.getString("app.version"));
+            alert.setHeaderText(applicationResources.getString("alert.import.failed"));
+            alert.setContentText(applicationResources.getString("alert.import.wrong.file.info"));
+            alert.showAndWait();
+            return;
+        } else {
+            // remember the last used directory
+            saveLastUsedDirectory(iCALFile);
+        }
+        try {
+            // load the plan from iCAL
+            runningPlan = ICALManager.loadRunningPlanFromICAL(sportsLibrary, iCALFile);
+            runningPlanEntries = runningPlan.getEntries();
+            // update the table object list
+            runningPlanEntryTableObjects.clear();
+            for (RunningPlanEntry entry: runningPlanEntries) {
+                runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
+            }
+            // refresh the table view
+            runningPlanEntryTableView.getItems().clear();
+            runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+            // enable editing and saving the running plan
+            canEdited();
+        } catch (Exception exception) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(applicationResources.getString("app.name")
+                    + " "
+                    + applicationResources.getString("app.version"));
+            alert.setHeaderText(applicationResources.getString("alert.import.failed"));
+            alert.showAndWait();
+            if (sportsLibrary.isDebugMode()) {
+                sportsLibrary.debug(exception, "Import from iCAL failed.");
+            }
+        }
+    }
+
     private void exportToJSONFile() {
         if (runningPlan != null) {
             // overwrite the entries with the actual list
@@ -539,8 +618,8 @@ public class MainViewController {
             // get the export directory with file chooser dialog
             FileChooser fileChooser = new FileChooser();
             fileChooser.setInitialDirectory(new File(directoryPathString));
-            fileChooser.setSelectedExtensionFilter(Global.TEMPLATE_FILE_EXTENSION_FILTER);
-            fileChooser.setInitialFileName(fileName + Global.TEMPLATE_FILE_EXTENSION);
+            fileChooser.setSelectedExtensionFilter(Global.JSON_FILE_EXTENSION_FILTER);
+            fileChooser.setInitialFileName(fileName + Global.JSON_FILE_EXTENSION);
             File jsonFile = fileChooser.showSaveDialog(mainSplitPane.getScene().getWindow());
             // remember last used directory
             saveLastUsedDirectory(jsonFile);

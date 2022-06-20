@@ -50,7 +50,8 @@
     <MenuBar VBox.vgrow="NEVER">
         <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
             <MenuItem fx:id="menuItemNew" mnemonicParsing="false" onAction="#onAction" text="New" />
-            <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#onAction" text="Open" />
+            <MenuItem fx:id="menuItemImportJSON" mnemonicParsing="false" onAction="#onAction" text="Import JSON" />
+            <MenuItem fx:id="menuItemImportICAL" mnemonicParsing="false" onAction="#onAction" text="Import iCAL" />
             <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#onAction" text="Save" disable="true"/>
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem fx:id="menuItemQuit" mnemonicParsing="false" onAction="#onAction" text="Quit" />
@@ -73,7 +74,7 @@
          <Arc fx:id="runningPlanMenuElement" fill="DODGERBLUE" layoutX="109.0" layoutY="50.0" length="270.0" onMouseClicked="#onMouseClicked" radiusX="47.0" radiusY="15.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
          <Label fx:id="runningPlanTemplateNodeLabel" alignment="CENTER" layoutX="15.0" layoutY="75.0" prefHeight="18.0" prefWidth="170.0" text="New Running plan" textAlignment="CENTER" />
         </AnchorPane>
-        <AnchorPane minHeight="600.0" minWidth="400.0">
+        <AnchorPane minHeight="600.0" minWidth="800.0">
             <TableView fx:id="runningPlanEntryTableView" layoutX="206.0" layoutY="137.0"
                        prefHeight="800.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0"
                        AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

@@ -1,6 +1,5 @@
 package de.hirola.runningplanbuilder;
 
-import de.hirola.sportsapplications.SportsLibrary;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
@@ -24,10 +23,15 @@ public final class Global {
 
     public static final Locale DEFAULT_LOCALE = new Locale("en");
 
-    // JSON im- and export
-    public static final FileChooser.ExtensionFilter TEMPLATE_FILE_EXTENSION_FILTER
+    // JSON import and export
+    public static final FileChooser.ExtensionFilter JSON_FILE_EXTENSION_FILTER
             = new FileChooser.ExtensionFilter("JSON Format", "*.json");
-    public static final String TEMPLATE_FILE_EXTENSION = ".json";
+    public static final String JSON_FILE_EXTENSION = ".json";
+
+    // JSON import and export
+    public static final FileChooser.ExtensionFilter ICAL_FILE_EXTENSION_FILTER
+            = new FileChooser.ExtensionFilter("iCAL Format", "*.ics");
+    public static final String ICAL_FILE_EXTENSION = ".ics";
 
     // localizations
     public static final String LOCALIZATION_PROPERTIES = "/localizations.properties";
@@ -51,11 +55,15 @@ public final class Global {
         public static final double DAY_COLUMN_PREF_WIDTH = 100.0;
         public static final double WEEK_COLUMN_PREF_WIDTH = 80.0;
         public static final double DURATION_COLUMN_PREF_WIDTH = 120.0;
-        public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 600.0;
+        public static final double DISTANCE_COLUMN_PREF_WIDTH = 120.0;
+        public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 400.0;
+        public static final double REMARKS_COLUMN_PREF_WIDTH = 800.0;
         public static final double MIN_WITH = DAY_COLUMN_PREF_WIDTH
                 + WEEK_COLUMN_PREF_WIDTH
                 + DURATION_COLUMN_PREF_WIDTH
+                + DISTANCE_COLUMN_PREF_WIDTH
                 + RUNNING_UNIT_COLUMN_PREF_WIDTH
+                + REMARKS_COLUMN_PREF_WIDTH
                 + 10.0;
 
     }

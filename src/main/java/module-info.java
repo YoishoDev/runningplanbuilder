@@ -7,6 +7,7 @@ module de.hirola.runningplanbuilder {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.datatype.jsr310;
+    requires jakarta.mail;
     requires org.tinylog.api;
     requires org.tinylog.impl;
     requires java.prefs;

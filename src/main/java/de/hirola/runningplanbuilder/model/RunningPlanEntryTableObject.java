@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -25,16 +26,25 @@ public class RunningPlanEntryTableObject {
     private String dayString;
     private String weekString;
     private String durationString;
+    private String distanceString;
+    private String remarksString;
     private String runningUnitsString;
 
 
     public RunningPlanEntryTableObject(@NotNull RunningPlanEntry entry) {
         uuid = entry.getUUID();
         applicationResources = ApplicationResources.getInstance();
+        remarksString = entry.getRemarks()
+                .orElse(applicationResources.getString("runningplanentry.remarks.default"));
         dayString = getWeekDayString(entry.getDay());
         weekString = String.valueOf(entry.getWeek());
         durationString = entry.getDuration() + " min";
+        distanceString = entry.getDistance() + " km";
         runningUnitsString = buildRunningUnitsString(entry.getRunningUnits());
+    }
+
+    public String getRemarksString() {
+        return remarksString;
     }
 
     public String getDayString() {
@@ -47,6 +57,10 @@ public class RunningPlanEntryTableObject {
 
     public String getDurationString() {
         return durationString;
+    }
+
+    public String getDistanceString() {
+        return distanceString;
     }
 
     public String getRunningUnitsString() {
@@ -69,9 +83,12 @@ public class RunningPlanEntryTableObject {
 
     public void update(@NotNull RunningPlanEntry entry) {
         if (entry.getUUID().equals(uuid)) {
+            remarksString = entry.getRemarks()
+                    .orElse(applicationResources.getString("runningplanentry.remarks.default"));
             dayString = getWeekDayString(entry.getDay());
             weekString = String.valueOf(entry.getWeek());
             durationString = entry.getDuration() + " min";
+            distanceString = entry.getDistance() + " km";
             runningUnitsString = buildRunningUnitsString(entry.getRunningUnits());
         }
     }
@@ -81,11 +98,15 @@ public class RunningPlanEntryTableObject {
         int count = 0;
         for (RunningUnit runningUnit: runningUnits) {
             count++;
-            MovementType movementType = runningUnit.getMovementType();
+            String movementTypeName = applicationResources.getString("movementType.name.default");
+            Optional<MovementType> movementType = runningUnit.getMovementType();
+            if (movementType.isPresent()) {
+                movementTypeName = movementType.get().getName();
+            }
             runningUnitsString
                     .append(runningUnit.getDuration())
                     .append(" min ")
-                    .append(movementType.getName());
+                    .append(movementTypeName);
             if (count < runningUnits.size()) {
                 runningUnitsString.append(", ");
             }
