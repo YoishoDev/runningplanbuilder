@@ -21,7 +21,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Arc;
@@ -48,13 +47,13 @@ import java.util.prefs.Preferences;
  * @since v0.1
  */
 public class MainViewController {
-
     private Stage mainWindow;
     private HostServices hostServices;
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
     private Preferences userPreferences;
     private boolean debugMode;
+    private boolean icalMode;
     private boolean useLastDirectory;
     private String lastDirectoryPath;
     private SportsLibrary sportsLibrary;
@@ -68,7 +67,6 @@ public class MainViewController {
     private ContextMenu tableViewContextMenu;
     private MenuItem tableViewContextMenuItemEdit;
     private MenuItem tableViewContextMenuItemDelete;
-
 
     // main app menu
     // created with SceneBuilder
@@ -524,7 +522,8 @@ public class MainViewController {
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
-            // enable editing and saving the running plan
+            // enable / disable editing and saving the running plan
+            icalMode = false;
             canEdited();
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -581,7 +580,8 @@ public class MainViewController {
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
-            // enable editing and saving the running plan
+            // enable / disable editing and saving the running plan
+            icalMode = true;
             canEdited();
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -689,9 +689,11 @@ public class MainViewController {
 
     // enable / disable editing
     private void canEdited() {
+        // save the mode to the preferences
+        userPreferences.putBoolean(Global.UserPreferencesKeys.ICAL_MODE, icalMode);
         boolean isEditable = runningPlan == null;
         menuItemEditRunningPlan.setDisable(isEditable);
-        menuItemSave.setDisable(isEditable);
+        menuItemSave.setDisable(icalMode); // in this version only json can be saved
         if (!runningPlanEntryTableObjects.isEmpty()) {
             runningPlanEntryTableView.setContextMenu(tableViewContextMenu);
         } else {
@@ -703,11 +705,13 @@ public class MainViewController {
         try {
             userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
             debugMode = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE, false);
+            icalMode = userPreferences.getBoolean(Global.UserPreferencesKeys.ICAL_MODE, false);
             useLastDirectory = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY, true);
-            lastDirectoryPath = userPreferences.get(Global.UserPreferencesKeys.LAST_DIRECTORY, "");
+            lastDirectoryPath = userPreferences.get(Global.UserPreferencesKeys.JSON_LAST_DIRECTORY, "");
         } catch (SecurityException exception) {
             debugMode = false;
             useLastDirectory = true;
+            icalMode = false;
             lastDirectoryPath = "";
             if (sportsLibrary.isDebugMode()) {
                 sportsLibrary.debug(exception, "Error while loading user preferences.");
@@ -717,7 +721,7 @@ public class MainViewController {
 
     private void saveLastUsedDirectory(@NotNull File jsonFile) {
         lastDirectoryPath = jsonFile.getParent();
-        userPreferences.put(Global.UserPreferencesKeys.LAST_DIRECTORY, lastDirectoryPath);
+        userPreferences.put(Global.UserPreferencesKeys.JSON_LAST_DIRECTORY, lastDirectoryPath);
     }
 
     private void saveLastWindowValues() {

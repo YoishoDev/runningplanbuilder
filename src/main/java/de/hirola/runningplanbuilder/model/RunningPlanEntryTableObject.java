@@ -30,7 +30,6 @@ public class RunningPlanEntryTableObject {
     private String remarksString;
     private String runningUnitsString;
 
-
     public RunningPlanEntryTableObject(@NotNull RunningPlanEntry entry) {
         uuid = entry.getUUID();
         applicationResources = ApplicationResources.getInstance();

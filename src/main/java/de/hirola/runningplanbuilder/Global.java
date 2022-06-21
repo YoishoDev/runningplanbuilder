@@ -78,7 +78,9 @@ public final class Global {
         public static final String LAST_MAIN_VIEW_POS_X = "mainview.last.posX";
         public static final String LAST_MAIN_VIEW_POS_Y = "mainview.last.posY";
         public static final String USE_LAST_DIRECTORY = "json.use.last.directory";
-        public static final String LAST_DIRECTORY = "json.last.directory";
+        public static final String JSON_LAST_DIRECTORY = "json.last.directory";
+        public static final String ICAL_LAST_DIRECTORY = "ical.last.directory";
+        public static final String ICAL_MODE = "ical.mode";
     }
 }
 
