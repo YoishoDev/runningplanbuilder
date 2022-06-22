@@ -14,6 +14,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * Copyright 2022 by Michael Schmidt, Hirola Consulting
@@ -34,6 +36,9 @@ import java.util.List;
 public class RunningEntryViewController {
     private final ApplicationResources applicationResources
             = ApplicationResources.getInstance(); // bundle for localization, ...
+
+    private final Preferences userPreferences
+            = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
     private SportsLibrary sportsLibrary;
     private RunningPlanEntry runningPlanEntry; // the entry for the view
     private List<RunningUnit> runningUnits; // list of all running units
@@ -45,7 +50,7 @@ public class RunningEntryViewController {
     private RunningUnitView runningUnitView;
     // created with SceneBuilder
     @FXML
-    private Label infoLabel;
+    private TextArea infoTextArea;
     @FXML
     private Label weekDayComboBoxLabel;
     @FXML
@@ -178,7 +183,7 @@ public class RunningEntryViewController {
     }
 
     private void setLabel() {
-        infoLabel.setText(applicationResources.getString("entryNodeView.infoText"));
+        infoTextArea.setText(applicationResources.getString("entryNodeView.infoText"));
         weekDayComboBoxLabel.setText(applicationResources.getString("entryNodeView.weekDayLabelText"));
         weekComboBoxLabel.setText(applicationResources.getString("entryNodeView.weekLabelText"));
         runningUnitsLabel.setText(applicationResources.getString("entryNodeView.runningUnitsLabelText"));
@@ -209,25 +214,62 @@ public class RunningEntryViewController {
     }
 
     private void initializeTableView() {
+        // view depends on import format - JSON or iCAL
+        final boolean iCALMode = userPreferences.getBoolean(Global.UserPreferencesKeys.ICAL_MODE, false);
         // a placeholder, if no running units in entry exists
         runningUnitsTableView.setPlaceholder(
                 new Label(applicationResources.getString("entryNodeView.table.defaultLabelText")));
-        runningUnitsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        runningUnitsTableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        double minWith = Global.RunningUnitTableViewPreferences.DURATION_COLUMN_PREF_WIDTH
+                + Global.RunningUnitTableViewPreferences.MOVEMENT_TYPE_KEY_COLUMN_PREF_WIDTH;
+        if (iCALMode) {
+            minWith += Global.RunningUnitTableViewPreferences.RUNNING_INFOS_COLUMN_PREF_WIDTH;
+        } else {
+            minWith += Global.RunningUnitTableViewPreferences.MOVEMENT_TYPE_NAME_COLUMN_PREF_WIDTH;
+        }
+        runningUnitsTableView.setMinSize(minWith, Region.USE_PREF_SIZE);
         // TODO: in this version only a single row can be selected
         runningUnitsTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         // the table column header
         TableColumn<RunningUnitTableObject, String> durationColumn
-                = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.1.headerText"));
+                = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.duration.headerText"));
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("duration"));
-        TableColumn<RunningUnitTableObject, String> movementTypeKeyColumn
-                = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.2.headerText"));
-        movementTypeKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
-        TableColumn<RunningUnitTableObject, String> movementTypeNameColumn
-                = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.3.headerText"));
-        movementTypeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        durationColumn.setPrefWidth(Global.RunningUnitTableViewPreferences.DURATION_COLUMN_PREF_WIDTH);
         runningUnitsTableView.getColumns().add(durationColumn);
+        TableColumn<RunningUnitTableObject, String> movementTypeKeyColumn
+                = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.movementType.key.headerText"));
+        movementTypeKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+        movementTypeKeyColumn.setPrefWidth(Global.RunningUnitTableViewPreferences.MOVEMENT_TYPE_KEY_COLUMN_PREF_WIDTH);
         runningUnitsTableView.getColumns().add(movementTypeKeyColumn);
-        runningUnitsTableView.getColumns().add(movementTypeNameColumn);
+        if (iCALMode) {
+            // iCAL
+            TableColumn<RunningUnitTableObject, String> movementRunningInfoColumn
+                    = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.movementType.runningInfos.headerText"));
+            movementRunningInfoColumn.setCellValueFactory(new PropertyValueFactory<>("runningInfos"));
+            movementRunningInfoColumn.setPrefWidth(Global.RunningUnitTableViewPreferences.RUNNING_INFOS_COLUMN_PREF_WIDTH);
+            // resize the last column - use the available width
+            movementRunningInfoColumn.prefWidthProperty().bind(
+                    runningUnitsTableView.widthProperty()
+                            .subtract(durationColumn.widthProperty())
+                            .subtract(movementTypeKeyColumn.widthProperty())
+                            .subtract(2)  // a border stroke?
+            );
+            runningUnitsTableView.getColumns().add(movementRunningInfoColumn);
+        } else {
+            // JSON
+            TableColumn<RunningUnitTableObject, String> movementTypeNameColumn
+                    = new TableColumn<>(applicationResources.getString("entryNodeView.table.column.movementType.name.headerText"));
+            movementTypeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+            movementTypeNameColumn.setPrefWidth(Global.RunningUnitTableViewPreferences.MOVEMENT_TYPE_NAME_COLUMN_PREF_WIDTH);
+            // resize the last column - use the available width
+            movementTypeNameColumn.prefWidthProperty().bind(
+                    runningUnitsTableView.widthProperty()
+                            .subtract(durationColumn.widthProperty())
+                            .subtract(movementTypeKeyColumn.widthProperty())
+                            .subtract(2)  // a border stroke?
+            );
+            runningUnitsTableView.getColumns().add(movementTypeNameColumn);
+        }
     }
 
     private void createContextMenuForTableView() {
@@ -243,7 +285,7 @@ public class RunningEntryViewController {
 
     private void showRunningPlanEntryInView() {
         if (runningPlanEntry != null) {
-            infoLabel.setText(runningPlanEntry.getRemarks()
+            infoTextArea.setText(runningPlanEntry.getRemarks()
                     .orElse(applicationResources.getString("runningplanentry.remarks.default")));
             // set values for day and week, select the combo boxes
             trainingDay = runningPlanEntry.getDay() ;

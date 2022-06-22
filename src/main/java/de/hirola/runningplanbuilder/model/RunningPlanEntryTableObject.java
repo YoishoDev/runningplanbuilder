@@ -97,11 +97,8 @@ public class RunningPlanEntryTableObject {
         int count = 0;
         for (RunningUnit runningUnit: runningUnits) {
             count++;
-            String movementTypeName = applicationResources.getString("movementType.name.default");
-            Optional<MovementType> movementType = runningUnit.getMovementType();
-            if (movementType.isPresent()) {
-                movementTypeName = movementType.get().getName();
-            }
+            MovementType movementType = runningUnit.getMovementType();
+            String movementTypeName = movementType.getName();
             runningUnitsString
                     .append(runningUnit.getDuration())
                     .append(" min ")

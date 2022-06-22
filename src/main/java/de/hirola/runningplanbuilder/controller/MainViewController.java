@@ -180,7 +180,6 @@ public class MainViewController {
         runningEntryMenuElement.setFill(Global.RUNNING_UNIT_NODE_COLOR);
         setMenuLabel();  // localisation the menu (item) labels
         setToolMenuLabel(); // localisation the tool "menu" item labels
-        initializeTableView();
         createContextMenuForTableView();
         canEdited(); // disable different menu items
     }
@@ -219,7 +218,7 @@ public class MainViewController {
             exportToJSONFile();
         }
         if (event.getSource().equals(menuItemQuit)) {
-            if (runningPlan != null) {
+            if (runningPlan != null && !icalMode) { // warning only with JSON
                 if (continueOperation()) {
                     saveLastWindowValues();
                     mainWindow.close();
@@ -293,11 +292,22 @@ public class MainViewController {
     }
 
     private void initializeTableView() {
+        // clear all columns - different columns for JSON or iCAL
+        runningPlanEntryTableView.getColumns().clear();
         // a placeholder, if no running entries in plan exists
         runningPlanEntryTableView.setPlaceholder(
                 new Label(applicationResources.getString("mainView.table.defaultLabelText")));
         runningPlanEntryTableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        runningPlanEntryTableView.setMinSize(Global.MainViewTableViewPreferences.MIN_WITH, Region.USE_PREF_SIZE);
+        double minWith = Global.MainViewTableViewPreferences.WEEK_COLUMN_PREF_WIDTH
+                + Global.MainViewTableViewPreferences.DAY_COLUMN_PREF_WIDTH
+                + Global.MainViewTableViewPreferences.DURATION_COLUMN_PREF_WIDTH
+                + Global.MainViewTableViewPreferences.DISTANCE_COLUMN_PREF_WIDTH;
+        if (icalMode) {
+            minWith += Global.MainViewTableViewPreferences.REMARKS_COLUMN_PREF_WIDTH;
+        } else {
+            minWith += Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH;
+        }
+        runningPlanEntryTableView.setMinSize(minWith, Region.USE_PREF_SIZE);
         // TODO: in this version only a single row can be selected
         runningPlanEntryTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         // the table column header
@@ -305,30 +315,56 @@ public class MainViewController {
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.week.headerText"));
         weekColumn.setCellValueFactory(new PropertyValueFactory<>("weekString"));
         weekColumn.setPrefWidth(Global.MainViewTableViewPreferences.WEEK_COLUMN_PREF_WIDTH);
+        runningPlanEntryTableView.getColumns().add(weekColumn);
+
         TableColumn<RunningPlanEntryTableObject, String> dayColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.day.headerText"));
         dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayString"));
         dayColumn.setPrefWidth(Global.MainViewTableViewPreferences.DAY_COLUMN_PREF_WIDTH);
+        runningPlanEntryTableView.getColumns().add(dayColumn);
+
         TableColumn<RunningPlanEntryTableObject, String> durationColumn
                 = new TableColumn<>(applicationResources.getString("mainView.table.column.duration.headerText"));
         durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationString"));
-        durationColumn.setPrefWidth(Global.MainViewTableViewPreferences.DISTANCE_COLUMN_PREF_WIDTH);
-        TableColumn<RunningPlanEntryTableObject, String> distanceColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.distance.headerText"));
-        distanceColumn.setCellValueFactory(new PropertyValueFactory<>("distanceString"));
-        TableColumn<RunningPlanEntryTableObject, String> remarksColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.remarks.headerText"));
-        remarksColumn.setCellValueFactory(new PropertyValueFactory<>("remarksString"));
-        TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
-                = new TableColumn<>(applicationResources.getString("mainView.table.column.entries.headerText"));
-        runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
-        remarksColumn.setPrefWidth(Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH);
-        runningPlanEntryTableView.getColumns().add(weekColumn);
-        runningPlanEntryTableView.getColumns().add(dayColumn);
+        durationColumn.setPrefWidth(Global.MainViewTableViewPreferences.DURATION_COLUMN_PREF_WIDTH);
         runningPlanEntryTableView.getColumns().add(durationColumn);
-        runningPlanEntryTableView.getColumns().add(distanceColumn);
-        runningPlanEntryTableView.getColumns().add(remarksColumn);
-        runningPlanEntryTableView.getColumns().add(runningUnitsColumn);
+
+        if (icalMode) {
+            TableColumn<RunningPlanEntryTableObject, String> distanceColumn
+                    = new TableColumn<>(applicationResources.getString("mainView.table.column.distance.headerText"));
+            distanceColumn.setCellValueFactory(new PropertyValueFactory<>("distanceString"));
+            distanceColumn.setPrefWidth(Global.MainViewTableViewPreferences.DISTANCE_COLUMN_PREF_WIDTH);
+            runningPlanEntryTableView.getColumns().add(distanceColumn);
+
+            TableColumn<RunningPlanEntryTableObject, String> remarksColumn
+                    = new TableColumn<>(applicationResources.getString("mainView.table.column.remarks.headerText"));
+            remarksColumn.setCellValueFactory(new PropertyValueFactory<>("remarksString"));
+            remarksColumn.setPrefWidth(Global.MainViewTableViewPreferences.REMARKS_COLUMN_PREF_WIDTH);
+            // resize the last column - use the available width
+            remarksColumn.prefWidthProperty().bind(
+                    runningPlanEntryTableView.widthProperty()
+                            .subtract(weekColumn.widthProperty())
+                            .subtract(dayColumn.widthProperty())
+                            .subtract(durationColumn.widthProperty())
+                            .subtract(distanceColumn.widthProperty())
+                            .subtract(2)  // a border stroke?
+            );
+            runningPlanEntryTableView.getColumns().add(remarksColumn);
+        } else {
+            TableColumn<RunningPlanEntryTableObject, String> runningUnitsColumn
+                    = new TableColumn<>(applicationResources.getString("mainView.table.column.entries.headerText"));
+            runningUnitsColumn.setCellValueFactory(new PropertyValueFactory<>("runningUnitsString"));
+            runningUnitsColumn.setPrefWidth(Global.MainViewTableViewPreferences.RUNNING_UNIT_COLUMN_PREF_WIDTH);
+            // resize the last column - use the available width
+            runningUnitsColumn.prefWidthProperty().bind(
+                    runningPlanEntryTableView.widthProperty()
+                            .subtract(weekColumn.widthProperty())
+                            .subtract(dayColumn.widthProperty())
+                            .subtract(durationColumn.widthProperty())
+                            .subtract(2)  // a border stroke?
+            );
+            runningPlanEntryTableView.getColumns().add(runningUnitsColumn);
+        }
     }
 
     private void createContextMenuForTableView() {
@@ -480,6 +516,7 @@ public class MainViewController {
     }
 
     private void importJSONFromFile() {
+        icalMode = false;
         // open system file dialog
         // user prefs for last directory
         String directoryPathString;
@@ -519,11 +556,14 @@ public class MainViewController {
             for (RunningPlanEntry entry: runningPlanEntries) {
                 runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
             }
+            // initialize the table
+            initializeTableView();
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+            // save the mode in user prefs
+            userPreferences.putBoolean(Global.UserPreferencesKeys.ICAL_MODE, icalMode);
             // enable / disable editing and saving the running plan
-            icalMode = false;
             canEdited();
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -539,6 +579,7 @@ public class MainViewController {
     }
 
     private void importICALFromFile() {
+        icalMode = true;
         // open system file dialog
         // user prefs for last directory
         String directoryPathString;
@@ -577,11 +618,14 @@ public class MainViewController {
             for (RunningPlanEntry entry: runningPlanEntries) {
                 runningPlanEntryTableObjects.add(new RunningPlanEntryTableObject(entry));
             }
+            // initialize the table
+            initializeTableView();
             // refresh the table view
             runningPlanEntryTableView.getItems().clear();
             runningPlanEntryTableView.getItems().addAll(runningPlanEntryTableObjects);
+            // save the mode in user prefs
+            userPreferences.putBoolean(Global.UserPreferencesKeys.ICAL_MODE, icalMode);
             // enable / disable editing and saving the running plan
-            icalMode = true;
             canEdited();
         } catch (Exception exception) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -705,13 +749,11 @@ public class MainViewController {
         try {
             userPreferences = Preferences.userRoot().node(Global.UserPreferencesKeys.USER_ROOT_NODE);
             debugMode = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_DEBUG_MODE, false);
-            icalMode = userPreferences.getBoolean(Global.UserPreferencesKeys.ICAL_MODE, false);
             useLastDirectory = userPreferences.getBoolean(Global.UserPreferencesKeys.USE_LAST_DIRECTORY, true);
             lastDirectoryPath = userPreferences.get(Global.UserPreferencesKeys.JSON_LAST_DIRECTORY, "");
         } catch (SecurityException exception) {
             debugMode = false;
             useLastDirectory = true;
-            icalMode = false;
             lastDirectoryPath = "";
             if (sportsLibrary.isDebugMode()) {
                 sportsLibrary.debug(exception, "Error while loading user preferences.");

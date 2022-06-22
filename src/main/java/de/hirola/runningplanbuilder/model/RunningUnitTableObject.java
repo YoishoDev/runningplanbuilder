@@ -19,18 +19,14 @@ public class RunningUnitTableObject {
     private final String duration;
     private final String key;
     private final String name;
+    private final String runningInfos; // for iCAL
 
     public RunningUnitTableObject(@NotNull RunningUnit runningUnit) {
         duration = runningUnit.getDuration() + " min";
-        Optional<MovementType> optionalMovementType = runningUnit.getMovementType();
-        if (optionalMovementType.isPresent()) {
-            MovementType movementType = optionalMovementType.get();
-            key = movementType.getKey();
-            name = movementType.getName();
-        } else {
-            key = "";
-            name = "";
-        }
+        runningInfos = runningUnit.getRunningInfos();
+        MovementType movementType = runningUnit.getMovementType();
+        key = movementType.getKey();
+        name = movementType.getName();
     }
 
     public String getDuration() {
@@ -43,5 +39,9 @@ public class RunningUnitTableObject {
 
     public String getName() {
         return name;
+    }
+
+    public String getRunningInfos() {
+        return runningInfos;
     }
 }

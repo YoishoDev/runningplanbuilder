@@ -5,39 +5,35 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="650.0" prefWidth="760.0"
-            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="de.hirola.runningplanbuilder.controller.RunningEntryViewController">
-   <Label fx:id="infoLabel" layoutX="40.0" layoutY="40.0" prefHeight="80.0" prefWidth="700.0" text="Infos" />
-   <Label fx:id="weekDayComboBoxLabel" layoutX="40.0" layoutY="140.0" prefHeight="40.0" prefWidth="160.0"
-          text="Running entry at:">
-      <font>
-         <Font size="14.0" />
-      </font>
-   </Label>
-   <ComboBox fx:id="weekDayComboBox" layoutX="240.0" layoutY="148.0" onAction="#onAction" prefWidth="220.0" />
-   <Label fx:id="weekComboBoxLabel" layoutX="40.0" layoutY="200.0" prefHeight="40.0" prefWidth="160.0" text="in week:">
-      <font>
-         <Font size="14.0" />
-      </font>
-   </Label>
-   <ComboBox fx:id="weekComboBox" layoutX="240.0" layoutY="207.0" onAction="#onAction" prefHeight="26.0" prefWidth="220.0" />
-   <Label fx:id="runningUnitsLabel" layoutX="40.0" layoutY="260.0" prefHeight="40.0" prefWidth="160.0" text="Running units">
-      <font>
-         <Font size="14.0" />
-      </font>
-   </Label>
-   <Button fx:id="addRunningUnitButton" layoutX="308.0" layoutY="265.0" mnemonicParsing="false" prefWidth="150.0"
-           onAction="#onAction" text="Hinzufügen" />
-   <ScrollPane layoutX="40.0" layoutY="315.0" prefHeight="240.0" prefWidth="680.0">
-      <TableView fx:id="runningUnitsTableView" prefHeight="240.0" prefWidth="680.0" />
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hirola.runningplanbuilder.controller.RunningEntryViewController">
+   <ScrollPane layoutX="40.0" layoutY="20.0" prefHeight="247.0" prefWidth="817.0">
+      <TextArea fx:id="infoTextArea" editable="false" prefHeight="244.0" prefWidth="815.0" wrapText="true" />
    </ScrollPane>
-   <Button fx:id="saveButton" layoutX="40.0" layoutY="590.0" mnemonicParsing="false" prefWidth="120.0"
-           onAction="#onAction" text="Save" />
-   <Button fx:id="cancelButton" layoutX="600.0" layoutY="590.0" mnemonicParsing="false" prefWidth="120.0"
-           onAction="#onAction" text="Cancel" />
+   <Label fx:id="weekDayComboBoxLabel" layoutX="40.0" layoutY="280.0" prefHeight="40.0" prefWidth="160.0" text="Running entry at:">
+      <font>
+         <Font size="14.0" />
+      </font>
+   </Label>
+   <ComboBox fx:id="weekDayComboBox" layoutX="240.0" layoutY="288.0" onAction="#onAction" prefWidth="220.0" />
+   <Label fx:id="weekComboBoxLabel" layoutX="40.0" layoutY="340.0" prefHeight="40.0" prefWidth="160.0" text="in week:">
+      <font>
+         <Font size="14.0" />
+      </font>
+   </Label>
+   <ComboBox fx:id="weekComboBox" layoutX="240.0" layoutY="347.0" onAction="#onAction" prefHeight="26.0" prefWidth="220.0" />
+   <Label fx:id="runningUnitsLabel" layoutX="40.0" layoutY="400.0" prefHeight="40.0" prefWidth="160.0" text="Running units">
+      <font>
+         <Font size="14.0" />
+      </font>
+   </Label>
+   <Button fx:id="addRunningUnitButton" layoutX="308.0" layoutY="405.0" mnemonicParsing="false" onAction="#onAction" prefWidth="150.0" text="Hinzufügen" />
+   <ScrollPane layoutX="40.0" layoutY="455.0" prefHeight="240.0" prefWidth="820.0">
+      <TableView fx:id="runningUnitsTableView" prefHeight="240.0" prefWidth="820.0" />
+   </ScrollPane>
+   <Button fx:id="saveButton" layoutX="40.0" layoutY="730.0" mnemonicParsing="false" onAction="#onAction" prefWidth="120.0" text="Save" />
+   <Button fx:id="cancelButton" layoutX="740.0" layoutY="730.0" mnemonicParsing="false" onAction="#onAction" prefWidth="120.0" text="Cancel" />
 </AnchorPane>

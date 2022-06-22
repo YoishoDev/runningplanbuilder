@@ -52,20 +52,21 @@ public final class Global {
 
     // main view table
     public static class MainViewTableViewPreferences {
-        public static final double DAY_COLUMN_PREF_WIDTH = 100.0;
         public static final double WEEK_COLUMN_PREF_WIDTH = 80.0;
-        public static final double DURATION_COLUMN_PREF_WIDTH = 120.0;
-        public static final double DISTANCE_COLUMN_PREF_WIDTH = 120.0;
-        public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 400.0;
+        public static final double DAY_COLUMN_PREF_WIDTH = 100.0;
+        public static final double DURATION_COLUMN_PREF_WIDTH = 100.0;
+        public static final double DISTANCE_COLUMN_PREF_WIDTH = 100.0;
+        public static final double RUNNING_UNIT_COLUMN_PREF_WIDTH = 200.0;
         public static final double REMARKS_COLUMN_PREF_WIDTH = 800.0;
-        public static final double MIN_WITH = DAY_COLUMN_PREF_WIDTH
-                + WEEK_COLUMN_PREF_WIDTH
-                + DURATION_COLUMN_PREF_WIDTH
-                + DISTANCE_COLUMN_PREF_WIDTH
-                + RUNNING_UNIT_COLUMN_PREF_WIDTH
-                + REMARKS_COLUMN_PREF_WIDTH
-                + 10.0;
 
+    }
+
+    // main view table
+    public static class RunningUnitTableViewPreferences {
+        public static final double DURATION_COLUMN_PREF_WIDTH = 100.0;
+        public static final double MOVEMENT_TYPE_KEY_COLUMN_PREF_WIDTH = 80.0;
+        public static final double MOVEMENT_TYPE_NAME_COLUMN_PREF_WIDTH = 100.0;
+        public static final double RUNNING_INFOS_COLUMN_PREF_WIDTH = 120.0;
     }
 
     public static class UserPreferencesKeys {
